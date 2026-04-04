@@ -168,6 +168,7 @@ PC_init_add_spritesheet(spr_PCSkin_MisterMike_Chrom01,                   "Chrom"
 PC_init_add_spritesheet(spr_PCSkin_MisterMike_Zelda1Link01,              "Zelda 1 Link",        "Mister Mike");
 PC_init_add_spritesheet(spr_PCSkin_MisterMike_Parutamu01,                "Parutamu",            "Mister Mike");
 PC_init_add_spritesheet(spr_PCSkin_MisterMike_Stalfos01,                 "Stalfos",             "Mister Mike");
+PC_init_add_spritesheet(spr_PCSkin_JarachiKid_Shantae01,                 "Shantae",             "Jarachi Kid");
 
 
 Skin_image = PCSkin_DEFAULT_SPRITE;
