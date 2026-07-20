@@ -194,7 +194,8 @@ switch(g.menu_state)
     //    _TYPE  = val(dm_dialogue[?_TYPE+STR_Type]);
     
     var _RandoHint_dialogue_dk = undefined;
-    
+    var _dialogue_full = ""; // set from the +"FULL" key when
+
     if (global.RandoHints_enabled)
     {
         if (val(global.dm_save_file_settings[?STR_Zelda+STR_Hint]) 
@@ -233,8 +234,13 @@ switch(g.menu_state)
             if (is_undefined(_dialogue)) // if hint not found yet
             {
                 g.dm_RandoHintsRecorder[?STR_Found+STR_Hint+STR_Num] = val(g.dm_RandoHintsRecorder[?STR_Found+STR_Hint+STR_Num], "") + hex_str(_num);
-                
-                _dialogue = dialogue;
+
+                // Prefer the full, un-truncated hint (index-keyed
+                // panel shows the whole string; fall
+                // for native (non-AP) hints that never wrote a full field.
+                _dialogue_full = val(f.dm_rando[?STR_Rando+STR_Hint+hex_str(_num)+STR_Dialogue+"FULL"], "");
+                if (is_string(_dialogue_full) && _dialogue_full != "") _dialogue = _dialogue_full;
+                else                                                   _dialogue = dialogue;
                 _dialogue = string_replace_all(_dialogue,"<"," ");
                 _dialogue = string_replace_all(_dialogue,">"," ");
                 g.dm_RandoHintsRecorder[?STR_Hint+hex_str(_num)+STR_Dialogue] = _dialogue;
@@ -251,6 +257,28 @@ switch(g.menu_state)
                 _pos += string_length(_item);
                 if (string_length(_dialogue)>=_pos) g.dm_RandoHintsRecorder[?STR_Hint+hex_str(_num)+STR_Text+"02"] = strR(_dialogue,_pos);
                 else                                g.dm_RandoHintsRecorder[?STR_Hint+hex_str(_num)+STR_Text+"02"] = "";
+
+                // AP: register this newly-revealed hint on the
+                if (variable_global_exists("AP_connected") && global.AP_connected)
+                {
+                    var _ap_hint_loc = val(f.dm_rando[?STR_Rando+STR_Hint+hex_str(_num)+STR_Location], 0);
+                    if (_ap_hint_loc > 0)
+                    {
+                        apclient_location_scouts("[" + string(_ap_hint_loc) + "]", 2);
+                        show_debug_message("AP: registered server hint for location " + string(_ap_hint_loc) + " (in-game hint #" + string(_num) + ")");
+                    }
+                    else
+                    {
+                        // No local location to scout -- this hint's
+                        var _rem_loc = val(f.dm_rando[?STR_Rando+STR_Hint+hex_str(_num)+STR_Location+"REMOTE"], 0);
+                        var _rem_own = val(f.dm_rando[?STR_Rando+STR_Hint+hex_str(_num)+STR_Location+"OWNER"], 0);
+                        if (_rem_loc > 0 && _rem_own > 0)
+                        {
+                            apclient_create_hints("[" + string(_rem_loc) + "]", _rem_own);
+                            show_debug_message("AP: registered remote server hint via CreateHints for location " + string(_rem_loc) + " in player " + string(_rem_own) + "'s world (in-game hint #" + string(_num) + ")");
+                        }
+                    }
+                }
             }
         }
     }
@@ -306,6 +334,25 @@ switch(g.menu_state)
             dialogue += "CIRCLE..."+">"; // Line 2
             dialogue += string(g.town_num)+_str1+" IS"+"<"; // Line 3
             dialogue += _CARDINAL_DIR;   // Line 4
+
+            // Record this clue for the hints panel
+            if (!is_undefined(f.dm_quests[?_DATAKEY]))
+            {
+                var _bld_dk = STR_Boulder+STR_Circle+STR_Order;
+
+                var _bld_abbr="", _bld_rem=_CARDINAL_DIR, _bld_wp;
+                while (string_length(_bld_rem)>0)
+                {
+                    _bld_abbr += string_char_at(_bld_rem,1); // first letter of each word
+                    _bld_wp = string_pos(" ", _bld_rem);
+                    if (_bld_wp==0) _bld_rem="";
+                    else            _bld_rem = string_delete(_bld_rem,1,_bld_wp);
+                }
+
+                f.dm_quests[?_bld_dk+hex_str(g.town_num)+STR_Found]  = _bld_abbr;
+                g.dm_RandoHintsRecorder[?_bld_dk+STR_Count]          = val(f.dm_quests[?_bld_dk+STR_Count]);
+                g.dm_RandoHintsRecorder[?_bld_dk+hex_str(g.town_num)] = _bld_abbr;
+            }
         }
         break;}//case NPC_7
     }//switch(g.dialogue_source.object_index)
@@ -592,7 +639,7 @@ switch(g.menu_state)
         {
             if (g.mod_WISEMEN_CAST_SPELL)
             {
-                if (           g.dialogue_source.give_spell)
+                if (g.dialogue_source.give_spell)
                 {   cast_spell(g.dialogue_source.give_spell);  }
                 
                 

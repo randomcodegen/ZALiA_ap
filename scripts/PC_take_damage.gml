@@ -61,6 +61,8 @@ if (g.DevTools_state)
     if (g.dev_invState&$3==1) _damage = 0; // dev
 }
 
+if (g.dev_godmode) _damage = 0; // Godmode: no HP loss, but knockback/stun/iframes
+
 adjust_stat(-_damage, 0);
 
 

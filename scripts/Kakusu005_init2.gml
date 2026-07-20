@@ -59,6 +59,7 @@ for(_i=g.rm_clms-3; _i>=0; _i--)
 
 
 
+ap_kakusu_index = 2; // KAKUSU02: Parapa Palace
 Kakusu_init2();
 
 

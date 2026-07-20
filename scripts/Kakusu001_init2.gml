@@ -157,6 +157,7 @@ if(0){
 
 
 
+ap_kakusu_index = 3; // KAKUSU03: DthMt HAMMER caves
 Kakusu_init2();
 
 

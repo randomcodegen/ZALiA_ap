@@ -73,6 +73,7 @@ set_xy(id, spawn_xl,spawn_yt);
 
 
 
+ap_kakusu_index = 7; // KAKUSU07: Darunia
 Kakusu_init2();
 
 

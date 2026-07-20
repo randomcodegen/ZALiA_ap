@@ -64,8 +64,6 @@ Audio_update();
 with(Input) Input_update2(); // determine inputs for this frame
 
 
-
-
 if (room_type=="C" 
 &&  overworld_paused )
 {

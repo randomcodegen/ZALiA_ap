@@ -12,6 +12,7 @@ is_idle = true;
 
 
 
+ap_kakusu_index = 12; // KAKUSU12: THUNDER Kakusu / North Islands
 Kakusu_init2();
 
 

@@ -32,13 +32,10 @@ dg_BODY_HB[#$02,0] =    2 + HB_ADJ_X; // xoff
 dg_BODY_HB[#$02,1] =    3 + HB_ADJ_Y; // yoff
 dg_BODY_HB[#$02,2] =   12 + HB_ADJ_W; // w
 dg_BODY_HB[#$02,3] =   23 + HB_ADJ_H; // h
-//                                  //
-//                                  //
-//                                  //
-// RestoreFairy, Item(width==8), Blaze, 
-dg_BODY_HB[#$03,0] =    1 + HB_ADJ_X; // xoff
+// RestoreFairy, Item(width==8), Blaze
+dg_BODY_HB[#$03,0] =   -2 + HB_ADJ_X; // xoff
 dg_BODY_HB[#$03,1] =    8 + HB_ADJ_Y; // yoff
-dg_BODY_HB[#$03,2] =    6 + HB_ADJ_W; // w
+dg_BODY_HB[#$03,2] =   16 + HB_ADJ_W; // w (right edge reaches xl+14; PC
 dg_BODY_HB[#$03,3] =    3 + HB_ADJ_H; // h
 //                                  //
 // Geldarm,
@@ -260,8 +257,6 @@ dg_BODY_HB[#$22,0] =    2 + HB_ADJ_X; // xoff
 dg_BODY_HB[#$22,1] =    3 + HB_ADJ_Y; // yoff
 dg_BODY_HB[#$22,2] =   12 + HB_ADJ_W; // w
 dg_BODY_HB[#$22,3] =   15 + HB_ADJ_H; // h
-//                                  //
-//                                  //
 
 
 
@@ -329,11 +324,10 @@ dg_BODY_HB[#$31,0] =    3 + HB_ADJ_X + _ADJ; // xoff.  OG: 3
 dg_BODY_HB[#$31,1] =    7 + HB_ADJ_Y; // yoff
 dg_BODY_HB[#$31,2] =   10 + HB_ADJ_W; // w
 dg_BODY_HB[#$31,3] =    2 + HB_ADJ_H; // h
-//                                  //
-// Item(width==16), 
-dg_BODY_HB[#$32,0] =    4; // xoff
+// Item(width==16)
+dg_BODY_HB[#$32,0] =    1; // xoff
 dg_BODY_HB[#$32,1] =    6; // yoff
-dg_BODY_HB[#$32,2] =    8; // w
+dg_BODY_HB[#$32,2] =   18; // w (right edge reaches xl+19; PC
 dg_BODY_HB[#$32,3] =    4; // h
 //                                  //
 // fix: Helmethead. OG: xoff = 0, w = 8
@@ -353,6 +347,11 @@ dg_BODY_HB[#$35,0] =    1 + HB_ADJ_X; // xoff
 dg_BODY_HB[#$35,1] =    8 + HB_ADJ_Y; // yoff
 dg_BODY_HB[#$35,2] =    6 + HB_ADJ_W; // w
 dg_BODY_HB[#$35,3] =   30 + HB_ADJ_H; // h
+// 1-Up Doll (8x16 sprite, held item — picked
+dg_BODY_HB[#$36,0] =    0; // xoff
+dg_BODY_HB[#$36,1] =    3; // yoff
+dg_BODY_HB[#$36,2] =   24; // w (extends 24px right of item
+dg_BODY_HB[#$36,3] =   10; // h
 //                                  //
 //                                  //
 //                                  //

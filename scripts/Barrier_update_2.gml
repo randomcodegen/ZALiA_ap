@@ -49,7 +49,7 @@ if(!global.pc.is_dead
         // A26F
         if (cs&CS_BD1)
         {
-            if (pc_is_cucco()  
+            if (pc_is_cucco()
             ||  pc_is_fairy() )
             {
                 global.pc.is_dead = 1;

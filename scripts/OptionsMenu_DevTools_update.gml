@@ -112,6 +112,7 @@ switch(DevTools_cursor)
         //f.items           &= ~ITM_FTHR;
         g.DevDash_state    = 0; // 0: Off, 1: On, 2: On and dash input held
         g.dev_invState     = 0;
+        g.dev_godmode      = false;
         
         save_game_pref();
         aud_play_sound(_SOUND2);
@@ -332,11 +333,23 @@ switch(DevTools_cursor)
     // -------------------------------------------------
     case DevTools.PC_DASH:{
     if (timer) break;
-    
+
     if (_InputConfirm_pressed2)
     {
         g.DevDash_state = !sign(g.DevDash_state); // 0: Off, 1: On, 2: On and dash input held
         save_game_pref();
+        aud_play_sound(_SOUND2);
+        timer = DURATION1;
+    }
+    break;}
+
+    // -------------------------------------------------
+    case DevTools.GODMODE:{
+    if (timer) break;
+
+    if (_InputConfirm_pressed2)
+    {
+        g.dev_godmode = !g.dev_godmode;
         aud_play_sound(_SOUND2);
         timer = DURATION1;
     }

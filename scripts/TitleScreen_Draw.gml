@@ -268,6 +268,29 @@ for(_j=ds_grid_width(dg_SeaSparkle)-1; _j>=1; _j--)
 draw_sprite_(SWORD_SPR,0, SWORD_SPR_X,SWORD_SPR_Y, global.PI_MOB_ORG);
 
 
+// AP connection status line
+draw_set_font(global.dl_game_font[|global.game_font_idx]);
+draw_set_halign(fa_center);
+draw_set_valign(fa_bottom);
+if (global.ap_ever_connected)
+{
+    draw_set_colour(c_white);
+    draw_text(g.rm_w_, g.rm_h - 4, "PRESS START");
+}
+else
+{
+    var _dot_phase = (g.counter1 >> 4) & 3;
+    var _dots = ".";
+    if (_dot_phase == 1) _dots = "..";
+    if (_dot_phase >= 2) _dots = "...";
+    draw_set_colour(make_colour_rgb(252, 188,  60)); // yellow
+    draw_text(g.rm_w_, g.rm_h - 4, "CONNECTING TO ARCHIPELAGO" + _dots);
+}
+draw_set_halign(fa_left);
+draw_set_valign(fa_top);
+draw_set_colour(c_white);
+
+
 
 
 

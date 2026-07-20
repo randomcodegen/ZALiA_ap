@@ -27,27 +27,29 @@ if (ds_grid_width(g.dg_RmTile_Liquid))
 {
     _clm = cp1X>>3;
     _row = cp1Y>>3;
-    if (is_in_grid(_clm,_row, ds_grid_width(g.dg_RmTile_Liquid),ds_grid_height(g.dg_RmTile_Liquid)) 
-    &&  g.dg_RmTile_Liquid[#_clm,_row]&$FF==TID_LQUID1 
+    if (is_in_grid(_clm,_row, ds_grid_width(g.dg_RmTile_Liquid),ds_grid_height(g.dg_RmTile_Liquid))
+    &&  g.dg_RmTile_Liquid[#_clm,_row]&$FF==TID_LQUID1
     && !(cs&$4) )
     {   // E0A4
         aud_play_sound(get_audio_theme_track(STR_PC+STR_Damage));
         var _damage = get_stat_max(STR_Heart);
-        
+
         var _FAIRY1 = f.items&ITM_FRY1;
         if (_FAIRY1)
         {
             _damage = Container_AMT<<1;
         }
-        
-        
-        if (g.DevTools_state 
+
+
+        if (g.DevTools_state
         &&  g.dev_invState&$3 )
         {
             _damage = 0; // g.dev_invState. 2: skip all, 1 skip dmg, 0 regular
         }
-        
-        
+
+        if (g.dev_godmode) _damage = 0;
+
+
         adjust_stat(-_damage, 0);
         
         if (_FAIRY1 

@@ -85,13 +85,59 @@ switch(g.dialogue_source.object_index)
     switch(g.dialogue_source.ver)
     {
         case 1:{
-        if (f.skills&SKILL_THD) dialogue_ver = "B"; // already have skill dialogue
-        f.skills |= SKILL_THD;
+        // AP: resolve this town's Stab Down skill-check
+        var _sk1_id = undefined;
+        if (global.AP_connected && variable_global_exists("ap_location_name_to_id")
+        &&  !is_undefined(g.town_name) && g.town_name != "")
+        {
+            var _sk1_desc = STR_Skill+STR_Location+g.town_name;
+            _sk1_id = ds_map_find_value(global.ap_location_name_to_id, _sk1_desc);
+        }
+        if (!is_undefined(_sk1_id))
+        {
+            var _sk1_real = real(_sk1_id);
+            // AP: never play the local acquisition. dialogue_ver
+            dialogue_ver = "B";
+            if (ds_list_find_index(global.ap_checked_ids, _sk1_real) == -1)
+            {
+                apclient_location_checks("[" + string(_sk1_real) + "]");
+                show_debug_message("AP: Checked skill location " + _sk1_desc + " (" + string(_sk1_real) + ")");
+                ds_list_add(global.ap_checked_ids, _sk1_real);
+            }
+        }
+        else
+        { // Vanilla / offline (or skills not
+            if (f.skills&SKILL_THD) dialogue_ver = "B"; // already have skill dialogue
+            f.skills |= SKILL_THD;
+        }
         break;}//case 1
-        
+
         case 2:{
-        if (f.skills&SKILL_THU) dialogue_ver = "B"; // already have skill dialogue
-        f.skills |= SKILL_THU;
+        // AP: resolve this town's Stab Up skill-check
+        var _sk2_id = undefined;
+        if (global.AP_connected && variable_global_exists("ap_location_name_to_id")
+        &&  !is_undefined(g.town_name) && g.town_name != "")
+        {
+            var _sk2_desc = STR_Skill+STR_Location+g.town_name;
+            _sk2_id = ds_map_find_value(global.ap_location_name_to_id, _sk2_desc);
+        }
+        if (!is_undefined(_sk2_id))
+        {
+            var _sk2_real = real(_sk2_id);
+            // AP: never play the local acquisition. dialogue_ver
+            dialogue_ver = "B";
+            if (ds_list_find_index(global.ap_checked_ids, _sk2_real) == -1)
+            {
+                apclient_location_checks("[" + string(_sk2_real) + "]");
+                show_debug_message("AP: Checked skill location " + _sk2_desc + " (" + string(_sk2_real) + ")");
+                ds_list_add(global.ap_checked_ids, _sk2_real);
+            }
+        }
+        else
+        { // Vanilla / offline (or skills not
+            if (f.skills&SKILL_THU) dialogue_ver = "B"; // already have skill dialogue
+            f.skills |= SKILL_THU;
+        }
         break;}//case 2
     }//switch(g.dialogue_source.ver)
     break;}//case NPC_6
@@ -104,22 +150,134 @@ switch(g.dialogue_source.object_index)
     // ---------------------------------------------------------------------
     case NPC_7:{ // B518. Spell Giver
     var _BIT = g.dialogue_source.give_spell;
-    
-    if (f.spells&_BIT)
+
+    // AP: remap dialogue to reflect the AP-world
+    var _ap_non_spell = false;
+    var _ap_spell_loc_id = undefined; // AP location ID for this town's
+    if (global.AP_connected && variable_global_exists("ap_location_name_to_id")
+    &&  !is_undefined(g.town_name) && g.town_name != "")
     {
-        if (_BIT!=SPL_SUMM) dialogue_ver = "D"; // Which boulder to break
-        else                dialogue_ver = "B"; // already have spell dialogue
+        var _loc_desc = STR_Spell+STR_Location+g.town_name;
+        _ap_spell_loc_id = ds_map_find_value(global.ap_location_name_to_id, _loc_desc);
+        show_debug_message("AP_SPELL1A: town='" + string(g.town_name) + "' desc='" + _loc_desc + "' ap_id=" + string(_ap_spell_loc_id));
+    }
+    if (!is_undefined(_ap_spell_loc_id) && variable_global_exists("ap_scouted_item_types"))
+    {
+        var _rmp_scouted = global.ap_scouted_item_types[?_ap_spell_loc_id];
+        var _rmp_cur_name = val(g.dm_Spell[?hex_str(_BIT)+STR_Name], "");
+        if (_rmp_cur_name == "") _rmp_cur_name = val(g.dialogue_source.give_spell_name, "");
+        if (is_undefined(_rmp_scouted) || _rmp_scouted == "")
+        {
+            // Cross-world item — no ZALiA spell dialogue
+            _ap_non_spell = true;
+        }
+        else if (_rmp_scouted != _rmp_cur_name)
+        {
+            if (Rando_is_spell(_rmp_scouted))
+            {
+                // Different AP spell — swap dialogue_datakey
+                var _rmp_new_dlg = val(g.dm_spawn[?STR_Spell+STR_Dialogue+STR_Datakey+_rmp_scouted], "");
+                if (_rmp_new_dlg != "")
+                    g.dialogue_source.dialogue_datakey = _rmp_new_dlg;
+                var _rmp_new_bit = val(g.dm_Spell[?_rmp_scouted+STR_Bit], 0);
+                if (_rmp_new_bit == 0)
+                {
+                    var _rmp_new_sdk = val(g.dm_spawn[?STR_Spell+STR_Spawn+STR_Datakey+_rmp_scouted], "");
+                    if (_rmp_new_sdk != "")
+                        _rmp_new_bit = val(g.dm_spawn[?STR_Spell+STR_Bit+_rmp_new_sdk], 0);
+                }
+                if (_rmp_new_bit != 0)
+                {
+                    g.dialogue_source.give_spell = _rmp_new_bit;
+                    _BIT = _rmp_new_bit;
+                }
+                show_debug_message("AP_SPELL1A: remapped dialogue to AP spell " + _rmp_scouted + " bit=$" + hex_str(_BIT));
+            }
+            else
+            {
+                // Non-spell ZALiA item — use boulder circle
+                _ap_non_spell = true;
+            }
+        }
+    }
+
+    // Under AP, f.spells can already carry this
+    var _already_learned_here = f.spells&_BIT;
+    if (global.AP_connected && !is_undefined(_ap_spell_loc_id))
+    {
+        _already_learned_here = ds_list_find_index(global.ap_checked_ids, _ap_spell_loc_id) != -1;
+    }
+
+    if (_already_learned_here)
+    {
+        // In AP mode every spell uses "D" (boulder
+        if (_BIT!=SPL_SUMM || global.AP_connected)
+            dialogue_ver = "D"; // Which boulder to break
+        else
+            dialogue_ver = "B"; // Vanilla only: "I don't know any more spells"
+    }
+    else if (_ap_non_spell)
+    {
+        // Non-spell/cross-world AP item: show boulder-circle hint
+        dialogue_ver = "D";
+        if (!is_undefined(_ap_spell_loc_id) && ds_list_find_index(global.ap_checked_ids, _ap_spell_loc_id) == -1)
+        {
+            show_debug_message("AP_SPELL1A: non-spell item, sending check for ap_id=" + string(_ap_spell_loc_id));
+            apclient_location_checks("[" + string(_ap_spell_loc_id) + "]");
+            ds_list_add(global.ap_checked_ids, _ap_spell_loc_id);
+        }
+        break;//case NPC_7
     }
     else if (g.mod_AcquireSpellRequirement==1   // 1: no requirement for spell
          ||  get_stat_max(STR_Magic)>=get_spell_cost(_BIT) ) // if can afford casting cost
     {
         dialogue_ver = "A"; // acquire spell dialogue
-        f.spells |= _BIT; // Include this spell bit in acquired spells property.
-        
-        // TODO: if you're going to have the HUD show g.spell_selected, 
-        // this may cause it to show before the menu opens.
-        // if this is the first spell player has acquired
-        if!(f.spells & ~_BIT) g.spell_selected = _BIT;
+        // _ap_grant_local: true = grant spell normally; false
+        var _ap_grant_local = true;
+
+        // _ap_spell_loc_id was resolved at the top
+        if (!is_undefined(_ap_spell_loc_id))
+        {
+            show_debug_message("AP_SPELL1A: ap_id=" + string(_ap_spell_loc_id) + " checked=" + string(ds_list_find_index(global.ap_checked_ids, _ap_spell_loc_id)));
+            if (ds_list_find_index(global.ap_checked_ids, _ap_spell_loc_id) == -1)
+            {
+                // First check: send to srv, suppress local
+                show_debug_message("AP_SPELL1A: sending check, server will grant item");
+                apclient_location_checks("[" + string(_ap_spell_loc_id) + "]");
+                ds_list_add(global.ap_checked_ids, _ap_spell_loc_id);
+                _ap_grant_local = false;
+                // Persist checked ID to file immediately
+                var _spsp_dir = environment_get_variable("LOCALAPPDATA");
+                if (_spsp_dir == "") _spsp_dir = working_directory;
+                var _spsp_path = _spsp_dir + "\ZALiA\ap_checked.json";
+                var _spsp_sz = ds_list_size(global.ap_checked_ids);
+                var _spsp_str = "[";
+                var _spsp_j;
+                for (_spsp_j = 0; _spsp_j < _spsp_sz; _spsp_j++)
+                {
+                    if (_spsp_j > 0) _spsp_str += ",";
+                    _spsp_str += string(global.ap_checked_ids[|_spsp_j]);
+                }
+                _spsp_str += "]";
+                var _spsp_fh = file_text_open_write(_spsp_path);
+                file_text_write_string(_spsp_fh, _spsp_str);
+                file_text_close(_spsp_fh);
+            }
+            else
+            {
+                // Already checked (reconnect scenario).
+                show_debug_message("AP_SPELL1A: already checked, server re-grants on reconnect");
+                dialogue_ver = "B";
+                break;//case NPC_7
+            }
+        }
+
+        if (_ap_grant_local)
+        {
+            f.spells |= _BIT; // Include this spell bit in acquired
+            // if this is the first spell player has acquired
+            if!(f.spells & ~_BIT) g.spell_selected = _BIT;
+        }
     }
     else
     {
@@ -231,7 +389,9 @@ switch(g.dialogue_source.object_index)
         
         // --------------------------------------------
         case $C:{ // Talo. BOOK sequence-3. Whale Isl.
-        if(!is_undefined( g.dialogue_source.Item_ITEM_ID) 
+        // item_acquired() is a vanilla anti-duplicate guard
+        if (!global.AP_connected
+        &&  !is_undefined( g.dialogue_source.Item_ITEM_ID)
         &&  item_acquired(g.dialogue_source.Item_ITEM_ID) )
         {          f.dm_quests[?STR_Talo+STR_State] = 2;  } // 1: Give item, 2: "Nothing left to give"
         

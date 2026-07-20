@@ -319,13 +319,11 @@ switch(_LOCATION_ID) // location id = rm name + rm item num
     ||  Rando_can_reach_Z1Area() ) // South end of Death Mtn
     {
         //if (Rando_can_traverse_DeathMtn())
-        if (ItemLocations_DARKROOM_DIFFICULTY>=2 
+        // The item ledge is reachable with
+        if (ItemLocations_DARKROOM_DIFFICULTY>=2
         ||  Rando_is_attainable(STR_CANDLE,STR_FIRE) )
         {
-            if (Rando_is_attainable(STR_JUMP,STR_FAIRY))
-            {
-                return true;
-            }
+            return true;
         }
     }
     break;}
@@ -339,13 +337,11 @@ switch(_LOCATION_ID) // location id = rm name + rm item num
     ||  Rando_can_reach_Z1Area() ) // South end of Death Mtn
     {
         //if (Rando_can_traverse_DeathMtn())
-        if (ItemLocations_DARKROOM_DIFFICULTY>=2 
+        // The item ledge is reachable with
+        if (ItemLocations_DARKROOM_DIFFICULTY>=2
         ||  Rando_is_attainable(STR_CANDLE,STR_FIRE) )
         {
-            if (Rando_is_attainable(STR_JUMP,STR_FAIRY))
-            {
-                return true;
-            }
+            return true;
         }
     }
     break;}

@@ -37,7 +37,7 @@ switch(sub_state)
                 if (cs&CS_BD1) global.pc.iframes_timer = 0;
                 if (cs&CS_BD1) enemy_collide_pc_body();
                 // A26F
-                if (cs&CS_BD1 
+                if (cs&CS_BD1
                 &&  (pc_is_fairy() || pc_is_cucco()) )
                 {
                     global.pc.is_dead = 1;
@@ -49,7 +49,7 @@ switch(sub_state)
                 // A26C: JSR D6C1
                 if (cs&CS_BD1) enemy_collide_pc_body();
                 // A26F
-                if (cs&CS_BD1 
+                if (cs&CS_BD1
                 && (pc_is_fairy() || pc_is_cucco()) )
                 {
                     global.pc.is_dead = 1;

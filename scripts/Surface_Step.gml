@@ -146,10 +146,12 @@ if (g.room_type=="A"
     }
     
     
-    if (_HINT_REQUESTED 
-    && !_KEYS_REQUESTED 
-    &&  global.RandoHints_enabled 
-    &&  val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]) )
+    // Rando item/location hints require the rando
+    if (_HINT_REQUESTED
+    && !_KEYS_REQUESTED
+    && ((global.RandoHints_enabled
+    &&   val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]) )
+    ||  !is_undefined(g.dm_RandoHintsRecorder[?STR_Boulder+STR_Circle+STR_Order+STR_Count]) ) )
     {
         can_draw_hints = true;
     }

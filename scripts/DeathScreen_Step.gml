@@ -7,7 +7,7 @@ if (deathScreenEndTimer)
     if(!deathScreenEndTimer)
     {
         f.death_count++;
-            lives--;
+        if(!g.dev_godmode) lives--; // Godmode: death sequence still plays out
         if (lives>0) room_goto_(rmB_NextLife);
         else         room_goto_(rmB_GameOver);
     }

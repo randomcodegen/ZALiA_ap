@@ -56,6 +56,10 @@ switch(RandoMAIN_cursor)
     if (InputConfirm_pressed)
     {
         aud_play_sound(get_audio_theme_track(CONFIRM_SOUND_THEME1));
+        if (variable_global_exists("AP_connected") && global.AP_connected)
+        {
+            dg_RandoITEM_Options[#RandoITEM_LOCS, 2] = 1;
+        }
         RandoState = RandoState_ITEM;
         FileSelect_Rando_cursor_reset(RandoState);
     }

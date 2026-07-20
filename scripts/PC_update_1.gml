@@ -71,8 +71,8 @@ if (state==state_DROWN) // OG state 2. Drowning
     if (yt>=DrownLiquid_y+($2<<3) 
     ||  yt>=viewYB()-($3<<3) )
     {
-        if (f.items&ITM_FRY1 
-        &&  f.hp )
+        if (g.dev_godmode
+        || (f.items&ITM_FRY1 && f.hp) )
         {
             var _X_PREV = x;
             var _Y_PREV = y;

@@ -7,7 +7,7 @@
 // && KAKUSU03: HAMMER || RAFT || (JUMP && (NOTE || FAIRY)).  *DthMt HAMMER caves
 // && KAKUSU04:(JUMP || FAIRY) && (HAMMER || RAFT || (JUMP && (NOTE || FAIRY))).  *DthMt bridge
 // && KAKUSU05: JUMP && GLOVE && STABDOWN.  *Ruto Mtns
-// && KAKUSU06: STABDOWN && GLOVE && FAIRY && JUMP && (RAFT || HAMMER || (JUMP && (NOTE || FAIRY))).  *P3
+// && KAKUSU06: STABDOWN && GLOVE && FAIRY && JUMP && (RAFT || HAMMER || (JUMP && (NOTE || FAIRY))) && (ALLKEY || P3keys>=4).  *P3
 // && KAKUSU07: STABUP && STABDOWN && JUMP && RAFT.  *Darunia
 // && KAKUSU08: RAFT.  *Darunia Forest
 // && KAKUSU09: FAIRY && STABDOWN && RAFT.  *MazeIsl
@@ -72,9 +72,11 @@ if (Rando_can_reach_RutoMtnRuins()  // bottom of the ruins
 
 
 // KAKUSU06: P3
-if (Rando_is_qual_location(val(dm_save_data[?STR_Dungeon+STR_Rando+STR_Island_Palace+"A"], STR_Island_Palace)) 
+if (Rando_is_qual_location(val(dm_save_data[?STR_Dungeon+STR_Rando+STR_Island_Palace+"A"], STR_Island_Palace))
 &&  Rando_is_attainable(STR_GLOVE)      // key & block wall
-&&  Rando_is_attainable(STR_STABDOWN) ) // kill kakusu
+&&  Rando_is_attainable(STR_STABDOWN)   // kill kakusu
+&& (Rando_is_attainable(STR_ALLKEY) // reach the Kakusu room deep in
+||  Rando_attainable_key_count(val(g.dm_dungeon[?STR_Dungeon+STR_Num+STR_Island_Palace],3))>=4) )
 {
     _count++;
 }

@@ -58,8 +58,8 @@ var _i, _a, _val;
 var _datakey;
 
 
-if (g.town_num 
-&&  g.town_name==STR_Bulblin 
+if (g.town_num
+&&  g.town_name==STR_Bulblin
 && !global.pc.Disguise_enabled )
 //&& !(f.items&ITM_MASK) )
 {
@@ -69,8 +69,8 @@ if (g.town_num
 
 
 
-if (dialogue_datakey==val(g.dm_rm[?"MidoChurchDoor"+dk_DialogueDatakey]) 
-//if (dialogue_datakey==g.DialogueDK_MIDO_CHURCH_DOOR 
+if (dialogue_datakey==val(g.dm_rm[?"MidoChurchDoor"+dk_DialogueDatakey])
+//if (dialogue_datakey==g.DialogueDK_MIDO_CHURCH_DOOR
 &&  val(f.dm_quests[?dk_MidoChurch+STR_Open]) )
 {
     state = 0;
@@ -360,23 +360,36 @@ else if (object_index==NPC_7) // Spell Giver
     //{   dialogue_datakey = val(g.dm_spawn[?STR_Spell+STR_Dialogue+STR_Datakey+dk_spawn], dialogue_datakey);  }
     
     
-    use_cucco_dlg = 0; // 
-    
-    if (g.mod_PC_CUCCO_1 
+    use_cucco_dlg = 0; //
+
+    if (g.mod_PC_CUCCO_1
     &&  give_spell==SPL_FARY )
     {
+        // AP: f.spells can already have the Fairy bit
+        var _ap_fary_mapped  = false;
+        var _ap_fary_checked = false;
+        if (global.AP_connected && variable_global_exists("ap_location_name_to_id")
+        &&  !is_undefined(g.town_name) && g.town_name != "")
+        {
+            var _cucco_loc_desc = STR_Spell+STR_Location+g.town_name;
+            var _cucco_loc_id   = ds_map_find_value(global.ap_location_name_to_id, _cucco_loc_desc);
+            if (!is_undefined(_cucco_loc_id))
+            {
+                _ap_fary_mapped  = true;
+                _ap_fary_checked = ds_list_find_index(global.ap_checked_ids, _cucco_loc_id) != -1;
+            }
+        }
+
         switch(ver)
         {
-            case 1:{ // NPC embarassed his magic turned cucco instead of fairy
-            if (f.spells & give_spell)
-            {
-                state = 0;
-                exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-            }
+            case 1:{ // Fairy wise man.
+            // Previously this NPC hid itself (state=0) once
             break;}
-            
+
             case 2:{ // FAIRY spell wiseman attempts spell again, makes it worse
-            if(!(f.spells & give_spell) 
+            var _already_learned2 = f.spells & give_spell;
+            if (_ap_fary_mapped) _already_learned2 = _ap_fary_checked;
+            if(!_already_learned2
             ||  g.CuccoSpell2_Acquired ) // Event already happened
             {
                 state = 0;

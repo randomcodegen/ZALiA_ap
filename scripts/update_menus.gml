@@ -54,7 +54,11 @@ switch(gui_state)
     else if (Input.Pause_pressed)
     //if ( Input.Pause_held          // Start btn $10
     //&& !(Input.heldPrev&Input.S) ) // Start btn $10
-    {   // Open Pause Menu
+    {
+        // Block pause menu until AP conn is
+        if (global.AP_connect_attempted && !global.AP_connected)
+            break;
+        // Open Pause Menu
         gui_state = gui_state_PAUSE;
         menu_state = 1;
         PAUSE_MENU.state = PAUSE_MENU.state_SPELL;

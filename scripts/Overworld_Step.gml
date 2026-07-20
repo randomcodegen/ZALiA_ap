@@ -19,6 +19,7 @@ RandoTSRC_active = global.can_rando_ow_tsrc && ds_map_size(dm_Rando_TSRC);
 
 move_x = 0;
 move_y = 0;
+move_step = 1;
 
 
 if (_C1)
@@ -105,6 +106,15 @@ if (_C1  // _C1 = !dest_dist && !exit_owrc && !flute_timer;
             }
         }
     }
+}
+
+
+// Dev dash: hold RT (GP_Other6/Right Trigger) to
+var _dash_now = (g.DevTools_state && g.DevDash_state == 2 && !g.app_paused);
+if (_dash_now)
+{
+    move_spd = 1;
+    move_step = 2;
 }
 
 
@@ -387,17 +397,17 @@ if (dest_dist) exit_owrc = 0;
 
 if (_IS_MOVE_FRAME)
 {
-    dest_dist--;
-    move_x = -_PC_DIR_SIGN_X; // + 0, 1, -1
-    move_y = -_PC_DIR_SIGN_Y; // + 0, 1, -1
+    dest_dist -= move_step;
+    move_x = -move_step * _PC_DIR_SIGN_X;
+    move_y = -move_step * _PC_DIR_SIGN_Y;
     
     
     if!(dest_dist&(T_SIZE-1)) // T_SIZE-1 = $F
     {
         _pc_clm  = (pcrc>>0)&$FF
         _pc_row  = (pcrc>>8)&$FF
-        _pc_clm += -move_x;
-        _pc_row += -move_y;
+        _pc_clm += -sign(move_x);
+        _pc_row += -sign(move_y);
         
         pcrc = (_pc_row<<8) | _pc_clm;
         pcrc_map = pcrc;

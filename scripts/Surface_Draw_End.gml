@@ -87,6 +87,8 @@ else if (surface_exists(srf_app_paused_frame))
 if (can_draw_keys) draw_key_stats();
 // Rando Hints
 if (can_draw_hints) draw_rando_hints();
+// AP Message Log
+ap_draw_messages();
 
 
 if (g.dev_invState&$FF8)

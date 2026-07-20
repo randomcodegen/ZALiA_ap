@@ -437,6 +437,10 @@ InputBack_pressed    = false;
 
 
 
+// Scope save filenames to the conn AP seed
+f_rebuild_save_filenames();
+
+
 // -------------------------------------------------
 dl_save_file_registered = ds_list_create();
 for(_i=0; _i<SAVE_FILE_MAX; _i++)

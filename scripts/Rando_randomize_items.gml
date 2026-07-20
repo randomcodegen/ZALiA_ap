@@ -25,6 +25,7 @@ if (CONTROL_ALLKEY==1) var _ALLKEY_RANDOM_VALUE=irandom(99);
 else                   var _ALLKEY_RANDOM_VALUE=0;
 
 FLUTE_LOC_NUM = 0;
+JUMP_LOC_NUM = 0;
 
 var _dm = ds_map_create();
 

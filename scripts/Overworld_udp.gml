@@ -384,21 +384,43 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
 &&  global.MarkItemLocations_state 
 &&  g.counter1&$40 )
 {
-    if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]) 
-    ||  val(global.dm_save_file_settings[?STR_Randomize+STR_PBAG+STR_Locations]) 
+    if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations])
+    ||  val(global.dm_save_file_settings[?STR_Randomize+STR_PBAG+STR_Locations])
     ||  val(global.dm_save_file_settings[?STR_Randomize+STR_Key +STR_Locations]) )
     {
         _count = val(f.dm_rando[?STR_Total+STR_Location+STR_Count]);
+
+        // Per-OWRC icon selection: when several locations
+        var _owrc_best       = ds_map_create(); // owrc_hex -> chosen location index _i
+        var _owrc_best_score = ds_map_create(); // owrc_hex -> that location's priority score
+
         for(_i=1; _i<=_count; _i++)
         {
             _datakey1 = STR_Location+hex_str(_i);
             _owrc = val(dm_rando_locations[?_datakey1+STR_OWRC], -1);
             if (_owrc!=-1)
             {
+                // AP mode: use live checked list from srv
+                var _live_acquired = val(dm_rando_locations[?_datakey1+STR_Acquired]);
+                if (global.AP_connected && variable_global_exists("ap_checked_ids"))
+                {
+                    var _ap_id4 = val(dm_rando_locations[?_datakey1+"_AP_ID"], 387642575169 + (_i - 1));
+                    _live_acquired = sign(ds_list_find_index(global.ap_checked_ids, _ap_id4) != -1);
+                }
                 if (global.MarkItemLocations_state==2 
-                ||  val(dm_rando_locations[?_datakey1+STR_Acquired]) )
+                ||  _live_acquired)
                 {
                     _item_id = f.dm_rando[?_datakey1+STR_Item+STR_ID+STR_Randomized];
+
+                    // Room start only admits missing native placements
+                    if (is_undefined(_item_id) && global.AP_connected
+                    &&  variable_global_exists("ap_scouted_flags"))
+                    {
+                        var _ap_missing_draw_id = val(dm_rando_locations[?_datakey1+"_AP_ID"], 387642575169 + (_i - 1));
+                        if (!is_undefined(dm_rando_locations[?_datakey1+"_AP_ID"])
+                        && !is_undefined(global.ap_scouted_flags[?_ap_missing_draw_id]))
+                            _item_id = "";
+                    }
                     if(!is_undefined(_item_id))
                     {
                         _x  = ow_pc_xy(0);
@@ -416,36 +438,154 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                         if (rectInView((_x>>SHIFT)<<SHIFT,(_y>>SHIFT)<<SHIFT, T_SIZE,T_SIZE))
                         {
                             ItemAcquiredIndicator_can_draw = true;
-                            dm_rando_locations[?_datakey1+dk_can_draw] = true;
-                            
+
                             _owrc_ = hex_str(_owrc);
-                            _count1 = val(dm_rando_locations[?_owrc_+STR_Item+STR_Count]);
-                            _count2 = val(dm_rando_locations[?_owrc_+STR_Acquired+STR_Count]);
-                            
-                            if (val(dm_rando_locations[?_owrc_+STR_Varied]))
+                            var _ap_scout_id = val(dm_rando_locations[?_datakey1+"_AP_ID"], 387642575169 + (_i - 1));
+
+                            // Rank this location for the shared-OWRC
+                            var _prio = 1; // collected / fallback
+                            if (!_live_acquired)
                             {
-                                if (_count2<_count1) _spr = spr_CheckMark2_0; // white
-                                else                 _spr = spr_CheckMark2_4; // magenta
+                                var _pflags = 0;
+                                if (global.AP_connected && variable_global_exists("ap_scouted_flags"))
+                                    _pflags = val(global.ap_scouted_flags[?_ap_scout_id], 0);
+                                     if (_pflags & 1) _prio = 4; // progression
+                                else if (_pflags & 2) _prio = 3; // useful
+                                else                  _prio = 2; // filler / unknown
                             }
-                            else if (string_pos(STR_PBAG,_item_id))
+
+                            // Highest priority owns the tile; ties keep
+                            var _prev_best  = val(_owrc_best[?_owrc_], -1);
+                            var _prev_score = val(_owrc_best_score[?_owrc_], -1);
+                            if (_prev_best == -1 || _prio > _prev_score)
                             {
-                                if (_count2<_count1) _spr = spr_CheckMark2_0; // white
-                                else                 _spr = spr_CheckMark2_3; // blue
-                            }
-                            else if (string_pos(STR_KEY, _item_id))
-                            {
-                                if (_count2<_count1) _spr = spr_CheckMark2_0; // white
-                                else                 _spr = spr_CheckMark2_2; // yellow
+                                if (_prev_best != -1)
+                                    dm_rando_locations[?STR_Location+hex_str(_prev_best)+dk_can_draw] = false;
+                                _owrc_best[?_owrc_]       = _i;
+                                _owrc_best_score[?_owrc_] = _prio;
+                                dm_rando_locations[?_datakey1+dk_can_draw] = true;
                             }
                             else
                             {
-                                if (_count2<_count1) _spr = spr_CheckMark2_0; // white
-                                else                 _spr = spr_CheckMark2_1; // green
+                                dm_rando_locations[?_datakey1+dk_can_draw] = false;
+                            }
+                            _count1 = val(dm_rando_locations[?_owrc_+STR_Item+STR_Count]);
+                            // AP mode: compute live acquired count from
+                            if (global.AP_connected && variable_global_exists("ap_checked_ids"))
+                            {
+                                _count2 = 0;
+                                for (var _jj = 1; _jj <= _count; _jj++)
+                                {
+                                    if (val(dm_rando_locations[?STR_Location+hex_str(_jj)+STR_OWRC], -1) == _owrc)
+                                    {
+                                        var _ap_jj_dk = STR_Location+hex_str(_jj);
+                                        var _ap_id5 = val(dm_rando_locations[?_ap_jj_dk+"_AP_ID"], 387642575169 + (_jj - 1));
+                                        if (ds_list_find_index(global.ap_checked_ids, _ap_id5) != -1)
+                                            _count2++;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                _count2 = val(dm_rando_locations[?_owrc_+STR_Acquired+STR_Count]);
                             }
                             
-                            dm_rando_locations[?_datakey1+STR_Sprite] = _spr;
-                            
-                            if (global.MarkItemLocations_state==2 
+                            // Does the player have this continent's treasure
+                            var _has_continent_map;
+                            if (g.area_name==Area_EastA || g.area_name==Area_MazIs)
+                                 _has_continent_map = (f.items&ITM_MAP2)!=0;
+                            else _has_continent_map = (f.items&ITM_MAP1)!=0;
+
+                            // With the map, reveal the actual item sprite
+                            var _spi = 0;
+                            // Sub-image for the icon. spr_AP_Logo (cross-world
+                            var _sub = 0;
+                            if (_has_continent_map && !_live_acquired)
+                            {
+                                // Map found, item still here: reveal its
+                                var _eff_item_id = _item_id;
+                                _spr = -1;
+                                if (global.AP_connected)
+                                {
+                                    // Cross-world item from another AP game: show
+                                    var _owner = undefined;
+                                    if (variable_global_exists("ap_scouted_players"))
+                                        _owner = global.ap_scouted_players[?_ap_scout_id];
+                                    if (!is_undefined(_owner) && _owner != global.ap_local_player)
+                                    {
+                                        _spr = spr_AP_Logo;
+                                        // Frame by AP classification (prog wins over
+                                        var _xflags = 0;
+                                        if (variable_global_exists("ap_scouted_flags"))
+                                            _xflags = val(global.ap_scouted_flags[?_ap_scout_id], 0);
+                                             if (_xflags & 1) _sub = 2; // progression
+                                        else if (_xflags & 2) _sub = 1; // useful
+                                        else                  _sub = 0; // neither
+                                    }
+                                    else
+                                    {
+                                        // Local item: prefer scouted type/sprite over
+                                        if (variable_global_exists("ap_scouted_item_types"))
+                                        {
+                                            var _sc_type = global.ap_scouted_item_types[?_ap_scout_id];
+                                            if (!is_undefined(_sc_type) && _sc_type != "")
+                                                _eff_item_id = _sc_type;
+                                        }
+                                        if (variable_global_exists("ap_scouted_sprites"))
+                                        {
+                                            var _sc_spr = global.ap_scouted_sprites[?_ap_scout_id];
+                                            if (!is_undefined(_sc_spr) && _sc_spr > 0)
+                                            {
+                                                _spr = _sc_spr;
+                                                _spi = global.PI_MOB_ORG; // real item art: pal-swap
+                                            }
+                                        }
+                                    }
+                                }
+
+                                // Not resolved via scout sprite (or non-AP)
+                                if (_spr==-1)
+                                {
+                                    _spr = val(g.dm_ITEM[?string(_eff_item_id)+STR_Sprite], -1);
+                                    if (_spr==-1 && string_pos(STR_KEY,_eff_item_id))
+                                    { // Palace-specific key (e.g. "_KEY04"): use generic
+                                        _spr = val(g.dm_ITEM[?STR_KEY+STR_Sprite], -1);
+                                    }
+                                    if (_spr!=-1) _spi = global.PI_MOB_ORG; // real item art: pal-swap
+                                }
+
+                                // Type-specific map icons. A few items missing
+                                if (_spr != spr_AP_Logo)
+                                {
+                                         if (_eff_item_id == STR_MAGIC)
+                                    {   _spr = spr_Item_Magic_container_1b; _spi = global.PI_MOB_ORG; } // magic container icon
+                                    else if (_eff_item_id == STR_STABDOWN
+                                         ||  _eff_item_id == STR_STABUP
+                                         ||  _eff_item_id == STR_SWORD)
+                                    {   _spr = spr_Item_Sword_1a_3; _spi = global.PI_MOB_ORG; } // sword / stab skill icon (matches
+                                }
+
+                                // No sprite for this item type: fall back
+                                if (_spr==-1)
+                                {
+                                         if (val(dm_rando_locations[?_owrc_+STR_Varied])) _spr = spr_CheckMark2_4; // magenta
+                                    else if (string_pos(STR_PBAG,_eff_item_id))          _spr = spr_CheckMark2_3; // blue
+                                    else if (string_pos(STR_KEY, _eff_item_id))          _spr = spr_CheckMark2_2; // yellow
+                                    else                                                 _spr = spr_CheckMark2_1; // green
+                                }
+                            }
+                            else
+                            {
+                                // Collected, or no map yet: non-spoiler
+                                     if (_count2<=0)      _spr = spr_CheckMark2_0; // white  (none acquired)
+                                else if (_count2<_count1) _spr = spr_CheckMark2_3; // blue   (partially cleared)
+                                else                      _spr = spr_CheckMark2_2; // yellow (fully cleared)
+                            }
+                            dm_rando_locations[?_datakey1+STR_Sprite]  = _spr;
+                            dm_rando_locations[?_datakey1+STR_Palette] = _spi;
+                            dm_rando_locations[?_datakey1+STR_Image]   = _sub;
+
+                            if (global.MarkItemLocations_state==2
                             ||  (_count1>1 && _count2) )
                             {
                                 _text = string(_count2)+"/"+string(_count1);
@@ -461,6 +601,9 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
             }
             //sdm("ITEM: "+string(val(_item_id))+".  "+"location_num: $"+hex_str(_i)+", _spawn_datakey '"+string(val(_spawn_datakey))+"'");
         }
+
+        ds_map_destroy(_owrc_best);
+        ds_map_destroy(_owrc_best_score);
     }
 }
 

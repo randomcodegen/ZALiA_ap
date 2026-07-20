@@ -133,6 +133,7 @@ switch(ver)
                 var _damage = get_stat_max(STR_Heart);
                 //if (f.items&ITM_FRY1) _damage = Container_AMT<<1;
                 //if (g.DevTools_state && g.dev_invState&$3) _damage = 0; // g.dev_invState. 2: skip all, 1 skip dmg, 0 regular
+                if (g.dev_godmode) _damage = 0;
                 with(global.pc) adjust_stat(-_damage, 0);
                 
                 g.pc_lock = PC_LOCK_ALL;

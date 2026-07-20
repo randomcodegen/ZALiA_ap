@@ -16,6 +16,7 @@ if(!is_undefined(dk_spawn))
 {   drop_dist = val(g.dm_spawn[?dk_spawn+STR_Distance], drop_dist);  }
 
 
+ap_kakusu_index = 6; // KAKUSU06: P3 (Island Palace)
 Kakusu_init2();
 
 

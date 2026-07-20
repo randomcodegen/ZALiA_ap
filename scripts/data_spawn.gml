@@ -669,6 +669,9 @@ for(_i=_arg; _i<argument_count; _i++)
             
             g.dm_spawn[?STR_Spell+STR_Bit                 +_SPAWN_DATAKEY] = _val1;
             g.dm_spawn[?STR_Spell+STR_Dialogue+STR_Datakey+_SPAWN_DATAKEY] = _DIALOGUE_DATAKEY;
+            // Store room-name key unconditionally — unique per
+            if (_OBJECT==NPC_7)
+                g.dm_spawn[?"_Wise"+"_Man"+STR_Spawn+STR_Datakey+_RM_NAME] = _SPAWN_DATAKEY;
         }
         continue;//_i
     }

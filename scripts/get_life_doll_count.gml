@@ -13,6 +13,10 @@ for(_i=val(f.dm_1up_doll[?STR_Count]); _i>=1; _i--)
     //show_debug_message("get_life_doll_count(). is_undefined(f.dm_1up_doll[?'"+hex_str(_i)+"'+STR_Item+STR_ID])="+string(is_undefined(_item_id))+", _count="+string(_count));
 }
 
+// AP: 1-Up dolls received from other worlds
+if (variable_global_exists("ap_received_dolls"))
+    _count += global.ap_received_dolls;
+
 
 return _count;
 

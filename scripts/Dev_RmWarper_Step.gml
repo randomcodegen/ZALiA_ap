@@ -1,6 +1,5 @@
 /// Dev_RmWarper_Step()
 
-
 // 2024/09/12. Anyone can use. This is useful if the player is making custom content and needs to get somewhere fast.
 //if(!DEV 
 //|| !g.DevTools_state 
@@ -253,15 +252,6 @@ if (_QUAL_STATE     // if right state
         else      aud_play_sound(SND_OPTION_CHANGE_UP);  // up   pressed
     }
 }
-
-
-
-
-
-
-
-
-
 
 
 

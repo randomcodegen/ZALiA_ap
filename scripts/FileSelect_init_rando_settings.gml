@@ -20,6 +20,11 @@ dg_RandoITEM_Options[#RandoITEM_DARKROOM,  2] = 0;
 dg_RandoITEM_Options[#RandoITEM_HINTS,     2] = 0;
 dg_RandoITEM_Options[#RandoITEM_ZELDA_HINT,2] = ZELDA_HINT_OPTIONS.NONE;
 dg_RandoITEM_Options[#RandoITEM_LOCS,      2] = 0;
+// AP mode: show rando as active on the
+if (variable_global_exists("AP_connected") && global.AP_connected)
+{
+    dg_RandoITEM_Options[#RandoITEM_LOCS,  2] = 1;
+}
 dg_RandoITEM_Options[#RandoITEM_PBAG,      2] = 0;
 dg_RandoITEM_Options[#RandoITEM_KEYS,      2] = 0;
 dg_RandoITEM_Options[#RandoITEM_BACK,      2] = 0;

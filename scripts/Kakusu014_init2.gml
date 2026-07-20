@@ -25,6 +25,7 @@ eyes_type = 2; // 1: EYES1(OG), 2: EYES2(cyclops)
 
 
 
+ap_kakusu_index = 10; // KAKUSU10: P6 (Three Eye Rock Palace)
 Kakusu_init2();
 
 

@@ -3,9 +3,13 @@
 
 if (Input.Pause_pressed)
 {
-    room_goto_(rmB_FileSelect);
-    g.MaskWideView_w = 0;
-    g.MaskWideView   = 0;
+    if (global.ap_ever_connected)
+    {
+        room_goto_(rmB_FileSelect);
+        g.MaskWideView_w = 0;
+        g.MaskWideView   = 0;
+    }
+    // else: block — AP not yet connected; draw shows status
 }
 
 

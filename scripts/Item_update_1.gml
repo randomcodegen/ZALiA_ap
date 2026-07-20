@@ -2,17 +2,46 @@
 
 // E771, E77B. Acquiring item
 
-
 var _MUSIC_THEME1 = dk_GetItem+"01";
 var _MUSIC_THEME2 = dk_GetItem+"02";
 var _can_flash=false;
+var _ap_skip_grant = false;
+if (global.AP_connected && variable_global_exists("AP_location_map"))
+{
+    _ap_skip_grant = !is_undefined(SPAWN_DATAKEY)
+    && !is_undefined(global.AP_location_map[?SPAWN_DATAKEY])
+    && !is_undefined(g.dm_spawn[?SPAWN_DATAKEY + STR_Item + STR_ID + STR_Randomized]);
+}
+
+// AP: send location check early (before switch)
+if (global.AP_connected && !is_undefined(SPAWN_DATAKEY))
+{
+    ap_check_location(SPAWN_DATAKEY, ITEM_ID, g.rm_name, AP_spawn_x, AP_spawn_y);
+}
+else if (global.AP_connected && !is_undefined(ITEM_ID))
+{
+    // Fallback: use item ID for locations w/o
+    ap_check_location(ITEM_ID, undefined, g.rm_name, AP_spawn_x, AP_spawn_y);
+}
+
+// Spell items placed by AP override (e.g
+if (!is_undefined(ITEM_TYPE) && is_string(ITEM_TYPE))
+{
+    var _spell_bit = val(g.dm_Spell[?STR_Bit+ITEM_TYPE], -1);
+    if (_spell_bit != -1 && !(f.spells & _spell_bit))
+    {
+        f.spells |= _spell_bit;
+        _can_flash = true;
+        show_debug_message("AP: Spell granted via pickup — bit $" + hex_str(_spell_bit) + " from ITEM_TYPE " + ITEM_TYPE);
+    }
+}
 
 switch(ITEM_TYPE)
 {
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_CANDLE:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -20,7 +49,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_GLOVE:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -28,7 +57,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_RAFT:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -36,7 +65,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_HAMMER:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -44,7 +73,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_BOOTS:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     Overworld_tile_change_2a(global.OVERWORLD.TileChangeEvent_TYPE_BOOT1);
@@ -53,7 +82,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_FLUTE:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -61,7 +90,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_BRACELET:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -69,7 +98,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_CROSS:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -81,7 +110,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_RFAIRY:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     g.StatRestore_timer_hp = get_stat_max(STR_Heart);
@@ -90,7 +119,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_BOOK:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -98,7 +127,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_MEAT:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -106,7 +135,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_PENDANT:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -114,7 +143,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_SHIELD:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -122,7 +151,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_SWORD:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -130,7 +159,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_RING:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -138,7 +167,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_ALLKEY:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -146,7 +175,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_MASK:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -158,7 +187,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_FEATHER:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -166,14 +195,14 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_MAP1:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME2), -1,false,-1, _MUSIC_THEME2);
     break;}
     
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_MAP2:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME2), -1,false,-1, _MUSIC_THEME2);
     break;}
     
@@ -184,7 +213,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_TROPHY:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -192,7 +221,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_NOTE:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -200,7 +229,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_MIRROR:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -208,7 +237,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_FLOWER:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -216,7 +245,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_CHILD:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -224,7 +253,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_BOTTLE:{
-    f.items |= ITEM_BIT;
+    if (!_ap_skip_grant) { f.items |= ITEM_BIT; }
     _can_flash=true;
     aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
     break;}
@@ -237,7 +266,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_HEART:{
-    f.cont_pieces_hp += string_copy(ITEM_ID, string_length(ITEM_ID)-3, 4);
+    if (!_ap_skip_grant) { f.cont_pieces_hp += string_copy(ITEM_ID, string_length(ITEM_ID)-3, 4); }
     g.StatRestore_timer_hp = get_stat_max(STR_Heart);
     if!(cont_piece_cnt_hp() mod f.CONT_PIECE_PER) // if this completes a container
     {    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);  }
@@ -247,7 +276,7 @@ switch(ITEM_TYPE)
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_MAGIC:{
-    f.cont_pieces_mp += string_copy(ITEM_ID, string_length(ITEM_ID)-3, 4);
+    if (!_ap_skip_grant) { f.cont_pieces_mp += string_copy(ITEM_ID, string_length(ITEM_ID)-3, 4); }
     g.StatRestore_timer_mp = get_stat_max(STR_Magic);
     if!(cont_piece_cnt_mp() mod f.CONT_PIECE_PER) // if this completes a container
     {    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);  }
@@ -264,9 +293,9 @@ switch(ITEM_TYPE)
     case STR_KEY:{ // E79A
     if(!is_undefined(ITEM_ID)  // key_datakey example: "0203", "0601"
     &&  is_string(   ITEM_ID) )
-    {   f.dm_keys[?  ITEM_ID+STR_Acquired] = true;  }
+    {       if (!_ap_skip_grant) { f.dm_keys[?  ITEM_ID+STR_Acquired] = true; }  }
     
-    f.key_count = get_key_count(g.dungeon_num);
+    if (!_ap_skip_grant) { f.key_count = get_key_count(g.dungeon_num); }
     aud_play_sound(get_audio_theme_track(dk_StabItem));
     break;}
     
@@ -280,7 +309,7 @@ switch(ITEM_TYPE)
     {
         if(!is_undefined(ITEM_ID) 
         &&  is_string(   ITEM_ID) )
-        {   f.dm_jars[?  ITEM_ID+STR_Acquired] = true;  }
+        {   if (!_ap_skip_grant) { f.dm_jars[?  ITEM_ID+STR_Acquired] = true; }  }
     }
     aud_play_sound(get_audio_theme_track(dk_StabItem));
     break;}
@@ -291,22 +320,25 @@ switch(ITEM_TYPE)
     // For that have a spawn datakey (not ones dropped by an enemy)
     if(!is_undefined(ITEM_ID) 
     &&  is_string(   ITEM_ID) )
-    {   f.dm_PBags[? ITEM_ID+STR_Acquired] = true;  }
+    {   if (!_ap_skip_grant) { f.dm_PBags[? ITEM_ID+STR_Acquired] = true; }  }
     
     aud_play_sound(get_audio_theme_track(dk_StabItem));
-    timer = g.XP_RISE_DURATION + 2; // $20 + 2
-    state = state_DROP; // for xp rise
+    if (!_ap_skip_grant)
+    {
+        timer = g.XP_RISE_DURATION + 2; // $20 + 2
+        state = state_DROP; // for xp rise
+    }
     break;}
     
     // ===============================================================================
     // ------------------------------------------------------------------------
     case STR_1UP:{ // E80C
-    lives++;
+    if (!_ap_skip_grant) { lives++; }
     
     if(!is_undefined(  ITEM_ID) 
     &&  is_string(     ITEM_ID) )
     {
-        f.dm_1up_doll[?ITEM_ID+STR_Acquired] = true;
+        if (!_ap_skip_grant) { f.dm_1up_doll[?ITEM_ID+STR_Acquired] = true; }
         //show_debug_message("Item_update_1(). "+"f.dm_1up_doll[?'"+ITEM_ID+"'+STR_Acquired] = true;");
     }
     
@@ -323,6 +355,8 @@ if (_can_flash)
     p.Flash_Bgr_timer     = _DURATION;
     p.SpellFlash_PC_timer = _DURATION;
 }
+
+// AP: Send location check (first call via
 
 
 

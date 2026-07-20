@@ -11503,6 +11503,7 @@
   </datafiles>
   <NewExtensions>
     <extension index="0">extensions\GMSched</extension>
+    <extension index="1">extensions\gm-apclientpp</extension>
   </NewExtensions>
   <sounds name="sound">
     <sound>sound\snd_0</sound>
@@ -12031,6 +12032,8 @@
       <sound>sound\mus_Wyng1_Title01</sound>
       <sound>sound\mus_Wyng1_Town01</sound>
     </sounds>
+    <sound>sound\sound498</sound>
+    <sound>sound\sound499</sound>
   </sounds>
   <sprites name="sprites">
     <sprite>sprites\spr_0</sprite>
@@ -12892,6 +12895,7 @@
         <sprite>sprites\spr_CheckMark2_2</sprite>
         <sprite>sprites\spr_CheckMark2_3</sprite>
         <sprite>sprites\spr_CheckMark2_4</sprite>
+        <sprite>sprites\spr_AP_Logo</sprite>
       </sprites>
     </sprites>
     <sprites name="door">
@@ -12920,6 +12924,9 @@
       <sprite>sprites\spr_OW_enc_char_2_1a</sprite>
       <sprite>sprites\spr_OW_enc_char_2_1b</sprite>
     </sprites>
+    <sprite>sprites\sprite728</sprite>
+    <sprite>sprites\sprite729</sprite>
+    <sprite>sprites\sprite730</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\background_0</background>
@@ -12985,6 +12992,7 @@
         <background>background\ts_Animation0401</background>
       </backgrounds>
     </backgrounds>
+    <background>background\background51</background>
   </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
@@ -15184,6 +15192,7 @@
         <script>scripts\FileSelect_get_file_seed.gml</script>
         <script>scripts\FileSelect_cursor_move.gml</script>
         <script>scripts\FileSelect_change_rando_seed.gml</script>
+        <script>scripts\f_rebuild_save_filenames.gml</script>
       </scripts>
       <scripts name="continue_save">
         <script>scripts\ContinueSaveScreen_Room_End.gml</script>
@@ -15384,6 +15393,48 @@
       <scripts name="item">
         <script>scripts\db_LifeDoll_data_1a.gml</script>
       </scripts>
+      <script>scripts\ap_generate_hints.gml</script>
+      <script>scripts\ap_generate_zelda_hint.gml</script>
+      <script>scripts\ap_wrap_dialogue.gml</script>
+    </scripts>
+    <scripts name="archipelago">
+      <script>scripts\dev_ap_export_data.gml</script>
+      <script>scripts\ap_init.gml</script>
+      <script>scripts\ap_room_info.gml</script>
+      <script>scripts\ap_slot_connected.gml</script>
+      <script>scripts\ap_slot_refused.gml</script>
+      <script>scripts\ap_socket_connected.gml</script>
+      <script>scripts\ap_socket_disconnected.gml</script>
+      <script>scripts\ap_socket_error.gml</script>
+      <script>scripts\ap_items_received.gml</script>
+      <script>scripts\ap_item_Step.gml</script>
+      <script>scripts\ap_item_draw.gml</script>
+      <script>scripts\ap_location_info.gml</script>
+      <script>scripts\ap_location_checked.gml</script>
+      <script>scripts\ap_print_json.gml</script>
+      <script>scripts\ap_draw_messages.gml</script>
+      <script>scripts\ap_bounced.gml</script>
+      <script>scripts\ap_send_deathlink.gml</script>
+      <script>scripts\obj_ap_client_Create.gml</script>
+      <script>scripts\obj_ap_client_Step.gml</script>
+      <script>scripts\ap_check_location.gml</script>
+      <script>scripts\ap_apply_slot_data.gml</script>
+      <script>scripts\ap_compute_location_checksum.gml</script>
+      <script>scripts\ap_load_loc_map_from_file.gml</script>
+      <script>scripts\ap_build_complete_map.gml</script>
+      <script>scripts\ap_build_settings_string.gml</script>
+      <script>scripts\ap_refresh_overworld_marks.gml</script>
+      <script>scripts\ap_hex_val.gml</script>
+      <script>scripts\ap_grant_doll.gml</script>
+      <script>scripts\ap_grant_key_next.gml</script>
+      <script>scripts\ap_grant_cont_piece.gml</script>
+      <script>scripts\ap_grant_item.gml</script>
+      <script>scripts\ap_grant_pbag.gml</script>
+      <script>scripts\ap_check_spell_location.gml</script>
+      <script>scripts\ap_get_scouted_sprite.gml</script>
+      <script>scripts\ap_name_to_gml.gml</script>
+      <script>scripts\ap_gml_to_name.gml</script>
+      <script>scripts\ap_process_pending.gml</script>
     </scripts>
   </scripts>
   <shaders name="shaders">
@@ -15972,6 +16023,10 @@
     </objects>
     <object>objects\GraphicsEffectsEditor</object>
     <object>objects\Surface</object>
+    <object>objects\obj_ap_client</object>
+    <object>objects\obj_ap_item_filler</object>
+    <object>objects\obj_ap_item_useful</object>
+    <object>objects\obj_ap_item_prog</object>
   </objects>
   <rooms name="rooms">
     <rooms name="rmB">

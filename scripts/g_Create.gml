@@ -227,7 +227,9 @@ ShieldHB_COLOR              = c_yellow;
 SwordHB_COLOR               = c_green;
 
 dev_invState = 0; // For testing. The state of pc's invulnerability. 0: Off. 1: No dmg. 2: NOT collidable
+dev_godmode  = false; // For testing. Blocks all incoming damage
 DevDash_state    = 0; // 0: Off, 1: On, 2: On and dash input held
+DevDash_timer    = 0; // Grace counter for holding dash through
 DoubleJump_state = false;
 use_StabToCheat  = false;
 

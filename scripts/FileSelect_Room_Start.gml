@@ -79,6 +79,11 @@ REGISTER_rando_is_on = false;
 REGISTER_file_seed = 0;
 REGISTER_new_save_file_name = 0;
 
+
+// Scope save filenames to the conn AP seed
+f_rebuild_save_filenames();
+
+
 ds_list_clear(dl_save_file_registered);
 for(_i=0; _i<SAVE_FILE_MAX; _i++)
 {

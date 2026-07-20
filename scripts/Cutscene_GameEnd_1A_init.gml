@@ -9,6 +9,12 @@ if(!g.game_end_state)
     exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1
 }
 
+if (global.AP_connected)
+{
+    apclient_status_update(global.AP_CLIENT_STATUS_GOAL);
+    show_debug_message("AP: Victory reported to server");
+}
+
 g.cutscene = g.CUTSCENE_GAME_END_1A;
 
 

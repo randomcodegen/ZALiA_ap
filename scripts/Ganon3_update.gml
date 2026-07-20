@@ -579,6 +579,11 @@ switch(sub_state)
             g.cutscene_part = 0;
             g.game_end_state = 1;
             global.QuestTimer_state = 0;
+            if (global.AP_connected)
+            {
+                apclient_status_update(global.AP_CLIENT_STATUS_GOAL);
+                show_debug_message("AP: Victory reported to server");
+            }
             break; // with(Exit)
         }
     }

@@ -299,6 +299,9 @@ var _DURATION = current_time - _START_TIME;
 //counter += _DURATION / (1000/room_speed);
 //show_debug_message("obj_start_Create(). "+"counter="+string_format(counter,4,8));
 
+// Create AP client for Archipelago multiplayer
+instance_create(0, 0, obj_ap_client);
+
 if (DEV)
 {
     repeat(1) show_debug_message("");

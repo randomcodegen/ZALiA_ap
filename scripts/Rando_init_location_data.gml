@@ -261,7 +261,13 @@ dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "THE<&<SITS NEXT<TO LA
 //                                                  //
 //                                                  //
 // BOTTLE item. North Castle Zelda room
-if (INCLUDE_BOTTLE_LOCATION && QUEST_NUM==2) _loc_num = Rando_add_location(Area_WestA+'00',$01, LocCatID_West01,0, 'BOTTLE item. North Castle Zelda room', STR_BOTTLE,$01);
+// AP: quest-2 only, but ALWAYS numbered
+// both quests (see dev_ap_export_data / apworld)
+// bc its in-game spawn is quest-2-qualified
+if (INCLUDE_BOTTLE_LOCATION) {
+    _loc_num = Rando_add_location(Area_WestA+'00',$01, LocCatID_West01,0, 'BOTTLE item. North Castle Zelda room', STR_BOTTLE,$01);
+    dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
+}
 //                                                  //
 //                                                  //
 // PBag: Roof of North Castle East Exit
@@ -751,8 +757,9 @@ dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "&<IS IN THE<MIDDLE OF
 //                                                  //
 //                                                  //
 // PBag: Raft ride in the sea
-if (QUEST_NUM==2){
+{
 _loc_num = Rando_add_location(Area_EastA+'76',$01, LocCatID_DragMr,2, 'PBag: Raft ride in the sea', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
 dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
 _a=0;
 dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "&<LIES OVER<A ROUGH<SEA.";
@@ -760,17 +767,19 @@ dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "THE<&<IS OUT IN<THE O
 //dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "&<IS<SURROUNDED<BY WATER.";
 }
 //                                                  //
-// PBag: Dragmire shoals location
-if (QUEST_NUM==2){
+// PBag: Dragmire shoals location (AP: quest-2
+{
 _loc_num = Rando_add_location(Area_EastA+'90',$02, LocCatID_DragMr,3, 'PBag: Dragmire shoals location', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
 dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
 _a=0;
 dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "&<IS ON THE<DRAGMIRE<SHOALS.";
 }
 //                                                  //
-// MASK location
-if (QUEST_NUM==2){
+// MASK location (AP: quest-2 only; always
+{
 _loc_num = Rando_add_location(Area_EastA+'A8',$01, LocCatID_DragMr,3, 'MASK location', STR_MASK,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
 dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
 _a=0;
 dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "PUSH SOME<STATUES<TO GET THE<&.";
@@ -779,17 +788,19 @@ dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "PUSH SOME<STATUES<TO 
 //dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "PUSH AROUND<STATUES<FOR THE<&.";
 }
 //                                                  //
-// PBag: MASK room, bag 1
-if (QUEST_NUM==2){
+// PBag: MASK room, bag 1 (AP
+{
 _loc_num = Rando_add_location(Area_EastA+'A8',$02, LocCatID_DragMr,3, 'PBag: MASK room, bag 1', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
 dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
 _a=0;
 dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "PUSH SOME<STATUES<TO GET THE<&.";
 }
 //                                                  //
-// PBag: MASK room, bag 2
-if (QUEST_NUM==2){
+// PBag: MASK room, bag 2 (AP
+{
 _loc_num = Rando_add_location(Area_EastA+'A8',$03, LocCatID_DragMr,3, 'PBag: MASK room, bag 2', STR_PBAG,$02);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
 dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
 _a=0;
 dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "PUSH SOME<STATUES<TO GET THE<&.";
@@ -1727,14 +1738,16 @@ dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "THE<&<IS IN A<PALACE.
 //                                                  //
 //                                                  //
 //                                                  //
-switch(QUEST_NUM){// Great Palace 1up location
-case 1:{
+// Great Palace 1up location -- physically
+// $03 PBag in quest 2), so
+// with the quest it appears in
 _loc_num = Rando_add_location(Area_PalcG+'29',$01, LocCatID_Dngn01,2, 'Great Palace 1up location',                  STR_1UP, $01);
-break;}
-case 2:{
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "01";
+_a=0;
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "&<IS IN THE<GREAT<PALACE.";
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "THE<&<IS IN A<PALACE.";
 _loc_num = Rando_add_location(Area_PalcG+'29',$03, LocCatID_Dngn01,2, 'Great Palace 1up location (2ND QUEST PBAG)', STR_PBAG,$02);
-break;}
-}
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
 _a=0;
 dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "&<IS IN THE<GREAT<PALACE.";
 dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "THE<&<IS IN A<PALACE.";
@@ -1847,8 +1860,13 @@ _loc_num = Rando_add_location(Area_TownA+'66',$01, LocCatID_Town01,0, _datakey+S
 _loc_num = Rando_add_location(Area_TownA+'69',$01, LocCatID_Town01,0, _datakey+STR_New_Kasuto, STR_Spell,$01);
 // Wiseman Old Kasuto spell                                                                                     //
 _loc_num = Rando_add_location(Area_TownA+'6B',$01, LocCatID_Town01,0, _datakey+STR_Old_Kasuto, STR_Spell,$01);
-// Wiseman Bulblin spell                                                                                        //
-if (QUEST_NUM==2) _loc_num = Rando_add_location(Area_TownB+'60',$01, LocCatID_Town01,0, _datakey+STR_Bulblin, STR_Spell,$01);
+// Wiseman Bulblin spell (AP: quest-2 only
+_loc_num = Rando_add_location(Area_TownB+'60',$01, LocCatID_Town01,0, _datakey+STR_Bulblin, STR_Spell,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_Qualified+STR_Quest+STR_Nums] = "02";
+// SKILL LOCATIONS -- Skill Knight NPC_6 teachers
+_loc_num = Rando_add_location(Area_TownA+'64',$01, LocCatID_Town01,0, STR_Skill+STR_Location+STR_Mido,    STR_STABDOWN,$01);
+// Skill: Stab Up (Darunia, room $67)
+_loc_num = Rando_add_location(Area_TownA+'67',$01, LocCatID_Town01,0, STR_Skill+STR_Location+STR_Darunia, STR_STABUP,  $01);
 /*
 // SPELL/WISEMAN LOCATIONS ---------------------------------------------
                                                            _datakey=STR_Spell+STR_Location;
@@ -1886,6 +1904,27 @@ if (QUEST_NUM==2) _loc_num = Rando_add_location(Area_TownB+'60',$01, LocCatID_To
 //                                                  //
 //                                                  //
 //                                                  //
+// INDIVIDUAL KAKUSU (Gold Slime) LOCATIONS
+// Exposed per the kakusu_individual_location_count option. The
+// when the specific slime is killed
+// resolves "Kakusu N" -> AP id
+// sync (loc_num / room_name / description
+// zalia_data.json so ap_compute_location_checksum() matches -- they
+// last, giving them loc_num 169-180.
+_loc_num = Rando_add_location(Area_WestA+'32',$01, LocCatID_Kaku01,0, 'Kakusu 1',  '',$01);
+_loc_num = Rando_add_location(Area_PalcA+'FC',$01, LocCatID_Kaku01,0, 'Kakusu 2',  '',$01);
+_loc_num = Rando_add_location(Area_DthMt+'0F',$01, LocCatID_Kaku01,0, 'Kakusu 3',  '',$01);
+_loc_num = Rando_add_location(Area_DthMt+'2C',$01, LocCatID_Kaku01,0, 'Kakusu 4',  '',$01);
+_loc_num = Rando_add_location(Area_WestA+'F8',$01, LocCatID_Kaku01,0, 'Kakusu 5',  '',$01);
+_loc_num = Rando_add_location(Area_PalcC+'11',$01, LocCatID_Kaku01,0, 'Kakusu 6',  '',$01);
+_loc_num = Rando_add_location(Area_TownA+'7E',$01, LocCatID_Kaku01,0, 'Kakusu 7',  '',$01);
+_loc_num = Rando_add_location(Area_EastA+'23',$01, LocCatID_Kaku01,0, 'Kakusu 8',  '',$01);
+_loc_num = Rando_add_location(Area_MazIs+'09',$01, LocCatID_Kaku01,0, 'Kakusu 9',  '',$01);
+_loc_num = Rando_add_location(Area_PalcF+'1E',$01, LocCatID_Kaku01,0, 'Kakusu 10', '',$01);
+_loc_num = Rando_add_location(Area_EastA+'36',$01, LocCatID_Kaku01,0, 'Kakusu 11', '',$01);
+_loc_num = Rando_add_location(Area_EastA+'37',$01, LocCatID_Kaku01,0, 'Kakusu 12', '',$01);
+
+
 Location_COUNT      = val(dm_LOCATIONS[?STR_Total+STR_Location+STR_Count]);
 dm_save_data[?                          STR_Total+STR_Location+STR_Count] = Location_COUNT;
 
@@ -1922,7 +1961,15 @@ var          _total_location_COUNT = ds_list_size(dl_location_NUMS);
 for(_i=0; _i<_total_location_COUNT; _i++)
 {
     _loc_num = dl_location_NUMS[|_i];
-    
+
+    // Persist this location's fixed home scene
+    // can anchor to the LOCATION rather
+    // Kakusu rewards use kill path
+    // no item spawn slot is ever
+    // falls back to the placed item's
+    // unrelated tile. See Overworld_Room_Start.gml.
+    dm_save_data[?STR_Location+hex_str(_loc_num)+STR_Rm+STR_Name] = dm_LOCATIONS[?hex_str(_loc_num)+STR_Rm+STR_Name];
+
     if (ds_list_find_index(dl_spell_location_NUMS,_loc_num)!=-1) continue;
     
     
@@ -1942,11 +1989,15 @@ for(_i=0; _i<_total_location_COUNT; _i++)
     for(_j=0; _j<_count; _j++)
     {
         _spawn_datakey =                  get_spawn_datakey(_rm_name,STR_PRIO,_j);
+        // Skip spawns not qualified for this quest so
+        var _qq = g.dm_spawn[?_spawn_datakey+STR_Qualified+STR_Quest+STR_Nums];
+        if (!is_undefined(_qq) && is_string(_qq) && !string_pos(hex_str(QUEST_NUM), _qq))
+            continue;//_j
             _obj = val(g.dm_spawn[?_spawn_datakey+STR_obj_idx], noone);
         if (_obj)
         {
             _datakey = g.dm_ITEM[?object_get_name(_obj)+STR_Item+STR_Type];
-            if(!is_undefined(_datakey) 
+            if(!is_undefined(_datakey)
             &&  _item_type== _datakey )
             {
                     _num++;
@@ -1958,16 +2009,19 @@ for(_i=0; _i<_total_location_COUNT; _i++)
                     _item_id = val(g.dm_spawn[?_spawn_datakey+STR_Item+STR_ID], "undefined.. "+"g.dm_spawn[?"+"_spawn_datakey"+"+STR_Item+STR_ID]");
                     dm_LOCATIONS[?hex_str(_loc_num)+STR_Item+STR_ID]     = _item_id; // _loc_num's vanilla item_id
                     dm_LOCATIONS[?string(_item_id)+STR_Location+STR_Num] = _loc_num; // item_id's vanilla _loc_num
-                    
+
                          if (ds_list_find_index(dl_item_location_NUMS,_loc_num)!=-1) ds_list_add(dl_ITEMS,_item_id);
                     else if (ds_list_find_index(dl_pbag_location_NUMS,_loc_num)!=-1) ds_list_add(dl_PBAGS,_item_id);
                     else if (ds_list_find_index(dl_key_location_NUMS, _loc_num)!=-1) ds_list_add(dl_KEYS, _item_id);
-                    //sdm("_loc_num $"+hex_str(_loc_num)+", _spawn_datakey: "+_spawn_datakey+", _item_id: "+_item_id);
+                    if (_loc_num <= 30)
+                        show_debug_message("RILD loc=$" + hex_str(_loc_num) + " rm=" + _rm_name + " itype=" + _item_type + " spawn=" + _spawn_datakey + " obj=" + object_get_name(_obj));
                     break;//_j
                 }
             }
         }
     }
+    if (_loc_num <= 30 && _num < _num1)
+        show_debug_message("RILD loc=$" + hex_str(_loc_num) + " rm=" + _rm_name + " itype=" + _item_type + " NO MATCH (found " + string(_num) + "/" + string(_num1) + " spawns)");
 }
 
 

@@ -24,6 +24,7 @@ projectile_ver = projectile_VER;
 
 
 
+ap_kakusu_index = 8; // KAKUSU08: Darunia Forest
 Kakusu_init2();
 
 

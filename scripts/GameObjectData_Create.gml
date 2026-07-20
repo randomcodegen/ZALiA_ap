@@ -120,6 +120,7 @@ HBae = $2D; // Zelda(sleeping)
 HBaf = $1D; // Cucco
 //              // 
 HBag = $32; // Item(width==16)
+HBak = $36; // 1-Up Doll (8x16, wider pickup area)
 //              // 
 HBah = $33; // Helmethead
 //              // 
@@ -1548,7 +1549,7 @@ o_name = object_get_name(ItmG0); // Extra Life                                  
 data_go_prop1(    ItmG0, "Extra_Life", spr_Placement_08x16);
 data_go_scr(  o_name,   Item_init, Item_init_2, Item_update, Item_udp, Item_draw);
 //                         pal,  hb,  cs,  hp,  atk,  xp,  rsp,  drp,  swd,  prj,  THN,  SPL,  DRN,  BRIGHT
-data_go_prop2(o_name+"01", PIi, HBc, CSc,   0,    0,   0,    0,    0, SWDg,    0);
+data_go_prop2(o_name+"01", PIi, HBak, CSc,   0,    0,   0,    0,    0, SWDg,    0);
 //                                                                                                          //
 //                                                                                                          //
 //                                                                                                          //
@@ -1565,6 +1566,21 @@ data_go_prop1(    ItmS0, "Spell", spr_SpellItem01);
 data_go_scr(  o_name,   Item_init, Item_init_2, Item_update, Item_udp, Item_draw);
 //                         pal,  hb,  cs,  hp,  atk,  xp,  rsp,  drp,  swd,  prj,  THN,  SPL,  DRN,  BRIGHT
 data_go_prop2(o_name+"01", PIa,_HB1, CSa,   0,    0,   0,    0,    0, SWDg,    0,    0,    0,    0);
+// AP cross-world item holders (filler / useful
+o_name = object_get_name(obj_ap_item_filler);
+data_go_prop1(    obj_ap_item_filler, "AP_Item_Filler", spr_Placement_16x16);
+data_go_scr(  o_name,   Item_init, Item_init_2, ap_item_Step, Item_udp, ap_item_draw);
+data_go_prop2(o_name+"01", PIa, HBc, CSc,   0,    0,   0,    0,    0, SWDa,    0);
+
+o_name = object_get_name(obj_ap_item_useful);
+data_go_prop1(    obj_ap_item_useful, "AP_Item_Useful", spr_Placement_16x16);
+data_go_scr(  o_name,   Item_init, Item_init_2, ap_item_Step, Item_udp, ap_item_draw);
+data_go_prop2(o_name+"01", PIa, HBc, CSc,   0,    0,   0,    0,    0, SWDa,    0);
+
+o_name = object_get_name(obj_ap_item_prog);
+data_go_prop1(    obj_ap_item_prog, "AP_Item_Prog", spr_Placement_16x16);
+data_go_scr(  o_name,   Item_init, Item_init_2, ap_item_Step, Item_udp, ap_item_draw);
+data_go_prop2(o_name+"01", PIa, HBc, CSc,   0,    0,   0,    0,    0, SWDa,    0);
 
 
 

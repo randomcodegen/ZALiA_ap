@@ -438,34 +438,28 @@ if (SpellLocations_WILL_RANDOMIZE
             }
         }
     }
-    
-    
-    
-    
-    LocCatID_West01 = '_West'+'01'; // West North
-    LocCatID_West02 = '_West'+'02'; // West South
-    LocCatID_Nabo01 = '_Nabo'+'01'; // Nabooru Area
-    LocCatID_Daru01 = '_Daru'+'01'; // Darunia Area
-    LocCatID_Kasu01 = '_Kasu'+'01'; // Kasuto Area
-    //LocCatID_East01 = '_East'+'01'; // East North
-    //LocCatID_East02 = '_East'+'02'; // East South
-    LocCatID_DMtn01 = '_DMtn'+'01'; // Death Mtn
-    LocCatID_Maze01 = '_Maze'+'01'; // Maze Island
-    LocCatID_NIsl01 = '_NIsl'+'01'; // North Islands
-    LocCatID_VOD01  = '_VOD' +'01'; // Valley of Death (VOD)
-    LocCatID_Sari01 = '_Sari'+'01'; // Saria River & Lake
-    LocCatID_RMtn01 = '_RMtn'+'01'; // Ruto Mtns
-    LocCatID_SCon01 = '_SCon'+'01'; // South Continent
-    LocCatID_DragMr = '_Drag'+'01'; // Dragmire area
-    LocCatID_Dngn01 = '_Dngn'+'01'; // Dungeons
-    LocCatID_Town01 = '_Town'+'01'; // Towns
-    //LocCatID_Obsc01 = '_Obsc'+'01'; // Obscure locations
-    
-    
-    
-    // set dm_LOCATIONS data
-    Rando_init_location_data();
 }
+
+// Location category constants (used by Rando_init_location_data
+LocCatID_West01 = '_West'+'01'; // West North
+LocCatID_West02 = '_West'+'02'; // West South
+LocCatID_Nabo01 = '_Nabo'+'01'; // Nabooru Area
+LocCatID_Daru01 = '_Daru'+'01'; // Darunia Area
+LocCatID_Kasu01 = '_Kasu'+'01'; // Kasuto Area
+LocCatID_DMtn01 = '_DMtn'+'01'; // Death Mtn
+LocCatID_Maze01 = '_Maze'+'01'; // Maze Island
+LocCatID_NIsl01 = '_NIsl'+'01'; // North Islands
+LocCatID_VOD01  = '_VOD' +'01'; // Valley of Death (VOD)
+LocCatID_Sari01 = '_Sari'+'01'; // Saria River & Lake
+LocCatID_RMtn01 = '_RMtn'+'01'; // Ruto Mtns
+LocCatID_SCon01 = '_SCon'+'01'; // South Continent
+LocCatID_DragMr = '_Drag'+'01'; // Dragmire area
+LocCatID_Dngn01 = '_Dngn'+'01'; // Dungeons
+LocCatID_Town01 = '_Town'+'01'; // Towns
+LocCatID_Kaku01 = '_Kaku'+'01'; // Individual Kakusu (Gold Slime) kills
+
+// set dm_LOCATIONS data
+Rando_init_location_data();
 
 
 
@@ -739,8 +733,48 @@ if (DungeonLocations_WILL_RANDOMIZE)
     //ds_list_add(dl_list1,Area_PalcH); // Dragmire Tower
     
     ds_list_copy(dl_list2,dl_list1);
-    ds_list_shuffle(dl_list2);
-    
+
+    // dl_list1[_i] is the overworld palace POSITION
+    if (variable_global_exists("ap_dungeon_position") && !is_undefined(global.ap_dungeon_position)
+    &&  ds_exists(global.ap_dungeon_position, ds_type_map))
+    {
+        var _apToArea = ds_map_create();
+        _apToArea[?"Parapa Palace"]         = Area_PalcA;
+        _apToArea[?"Midoro Palace"]         = Area_PalcB;
+        _apToArea[?"Island Palace"]         = Area_PalcC;
+        _apToArea[?"Maze Island Palace"]    = Area_PalcD;
+        _apToArea[?"Palace on the Sea"]     = Area_PalcE;
+        _apToArea[?"Three Eye Rock Palace"] = Area_PalcF;
+        _apToArea[?"Great Palace"]          = Area_PalcG;
+
+        // Invert dungeon_position (content -> position) into
+        var _posToContentA = ds_map_create();
+        var _apKeyD = ds_map_find_first(global.ap_dungeon_position);
+        while (!is_undefined(_apKeyD))
+        {
+            var _cArea = _apToArea[?_apKeyD];
+            var _pArea = _apToArea[?global.ap_dungeon_position[?_apKeyD]];
+            if (!is_undefined(_cArea) && !is_undefined(_pArea))
+            {
+                _posToContentA[?_pArea] = _cArea;
+            }
+            _apKeyD = ds_map_find_next(global.ap_dungeon_position, _apKeyD);
+        }
+
+        for(_i=0; _i<ds_list_size(dl_list1); _i++)
+        {
+            var _cArea2 = _posToContentA[?dl_list1[|_i]];
+            if (!is_undefined(_cArea2)) dl_list2[|_i] = _cArea2;
+        }
+
+        ds_map_destroy(_apToArea);
+        ds_map_destroy(_posToContentA);
+    }
+    else
+    {
+        ds_list_shuffle(dl_list2);
+    }
+
     var _dl_list1_COUNT = ds_list_size(dl_list1);
     for(_i=0; _i<_dl_list1_COUNT; _i++)
     //for(_i=ds_list_size(dl_list1)-1; _i>=0; _i--)
@@ -1533,7 +1567,37 @@ if (ItemLocations_WILL_RANDOMIZE)
 
 
 
+// AP Start --- AP Export Hotkey
+dev_ap_export_data();
+// AP: Fill any missing entries in the location
+ap_build_complete_map();
 
+// AP: Verify this build's location table still
+if (variable_global_exists("AP_connected") && global.AP_connected)
+{
+    global.ap_location_data_stale = false;
+    if (global.ap_slotdata_location_checksum != "")
+    {
+        var _local_checksum = ap_compute_location_checksum();
+        if (_local_checksum != global.ap_slotdata_location_checksum)
+        {
+            global.ap_location_data_stale = true;
+            show_debug_message("AP: LOCATION DATA CHECKSUM MISMATCH! local=" + _local_checksum + " server=" + global.ap_slotdata_location_checksum + " -- Rando_init_location_data.gml is out of sync with the exported apworld data (re-run dev_ap_export_data() and update zalia_data.json).");
+
+            // This build's location table doesn't match what
+            apclient_disconnect();
+            global.AP_connected = false;
+            global.AP_connect_attempted = false;
+            show_message("AP location data mismatch: this game build is out of sync with the connected apworld (re-export ap_data_export.json / zalia_data.json).#The game will now close.");
+            game_end();
+        }
+        else
+        {
+            show_debug_message("AP: location data checksum OK (" + _local_checksum + ")");
+        }
+    }
+}
+// end --- AP End
 
 
 

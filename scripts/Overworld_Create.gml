@@ -199,6 +199,7 @@ MOVE_SPD_3 = $1<<_i++; // !(g.counter1 & (4-1)): every 4 frames
 move_spd   = 0; // 0: no movement
 move_x     = 0;
 move_y     = 0;
+move_step  = 1;
 
 
 // Movement system using fractional values

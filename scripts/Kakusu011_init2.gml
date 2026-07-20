@@ -36,6 +36,7 @@ jump_chance = JUMP_CHANCE2; // JUMP_CHANCE2: $40
 
 
 
+ap_kakusu_index = 11; // KAKUSU11: Kasuto Cemetery
 Kakusu_init2();
 
 

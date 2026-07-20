@@ -16,6 +16,7 @@ eyes_type = 0; // 1: EYES1(OG), 2: EYES2(cyclops)
 
 
 
+ap_kakusu_index = 1; // KAKUSU01: North Castle
 Kakusu_init2();
 
 

@@ -53,7 +53,58 @@ switch(counter) // 00AF[eIndex]
         set_xlyt(id, xl,global.pc.yt);
         
         f.crystals |= $1<<(DUNGEON_NUM-1);
-        
+
+        // AP: this palace's crystal is a real location
+        if (global.AP_connected
+        &&  variable_global_exists("ap_location_name_to_id")
+        && !is_undefined(global.ap_location_name_to_id))
+        {
+            var _crystal_loc_name = "";
+            var _boss_item_loc_name = "";
+            switch(DUNGEON_NUM)
+            {
+                case 1:{ _crystal_loc_name = "Parapa Palace: Crystal";         _boss_item_loc_name = "Parapa Palace: Boss Item";         break; }
+                case 2:{ _crystal_loc_name = "Midoro Palace: Crystal";         _boss_item_loc_name = "Midoro Palace: Boss Item";         break; }
+                case 3:{ _crystal_loc_name = "Island Palace: Crystal";         _boss_item_loc_name = "Island Palace: Boss Item";         break; }
+                case 4:{ _crystal_loc_name = "Maze Island Palace: Crystal";    _boss_item_loc_name = "Maze Island Palace: Boss Item";    break; }
+                case 5:{ _crystal_loc_name = "Palace on the Sea: Crystal";     _boss_item_loc_name = "Palace on the Sea: Boss Item";     break; }
+                case 6:{ _crystal_loc_name = "Three Eye Rock Palace: Crystal"; _boss_item_loc_name = "Three Eye Rock Palace: Boss Item"; break; }
+            }
+            if (!variable_global_exists("AP_location_map"))
+                global.AP_location_map = ds_map_create();
+
+            if (_crystal_loc_name != "")
+            {
+                var _crystal_ap_id = ds_map_find_value(global.ap_location_name_to_id, _crystal_loc_name);
+                if (!is_undefined(_crystal_ap_id))
+                {
+                    var _crystal_dk = STR_Crystal + hex_str(DUNGEON_NUM);
+                    global.AP_location_map[?_crystal_dk] = _crystal_ap_id;
+                    global.AP_location_map[?_crystal_dk + "_desc"] = _crystal_loc_name;
+                    ap_check_location(_crystal_dk, undefined, g.rm_name, x, y);
+                }
+            }
+
+            // Boss item — only when the apworld enabled
+            var _boss_items_on = false;
+            if (variable_global_exists("ap_slot_data") && !is_undefined(global.ap_slot_data))
+            {
+                var _bi_opt = ds_map_find_value(global.ap_slot_data, "boss_item_locations");
+                _boss_items_on = !is_undefined(_bi_opt) && real(_bi_opt);
+            }
+            if (_boss_items_on && _boss_item_loc_name != "")
+            {
+                var _boss_ap_id = ds_map_find_value(global.ap_location_name_to_id, _boss_item_loc_name);
+                if (!is_undefined(_boss_ap_id))
+                {
+                    var _boss_dk = STR_Crystal + STR_Item + hex_str(DUNGEON_NUM);
+                    global.AP_location_map[?_boss_dk] = _boss_ap_id;
+                    global.AP_location_map[?_boss_dk + "_desc"] = _boss_item_loc_name;
+                    ap_check_location(_boss_dk, undefined, g.rm_name, x, y);
+                }
+            }
+        }
+
         aud_play_sound(get_audio_theme_track(STR_Sword+STR_Beam));
         audio_group_stop_all(audiogroup_mus); // stop music?
         // stop mus_rm_body from playing until hp/mp restore is done

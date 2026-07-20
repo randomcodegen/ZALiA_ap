@@ -11,6 +11,7 @@ eyes_type = 1; // 1: EYES1(OG), 2: EYES2(cyclops)
 is_idle   = true;
 
 
+ap_kakusu_index = 5; // KAKUSU05: Ruto Mtns
 Kakusu_init2();
 
 

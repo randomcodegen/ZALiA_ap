@@ -133,6 +133,25 @@ _dm_save_data[?f.SDNAME_linkDolls]              = json_encode(f.dm_1up_doll);
 _dm_save_data[?f.SDNAME_quests]                 = json_encode(f.dm_quests);
 _dm_save_data[?f.SDNAME_exploredRooms]          = json_encode(f.dm_explored);
 
+// AP state persistence (reconnect recovery)
+if (variable_global_exists("ap_items_received_index") && !is_undefined(global.ap_items_received_index))
+    _dm_save_data[?"_AP_Items_Received_Index"] = global.ap_items_received_index;
+if (variable_global_exists("ap_received_dolls") && !is_undefined(global.ap_received_dolls))
+    _dm_save_data[?"_AP_Received_Dolls"] = global.ap_received_dolls;
+if (variable_global_exists("ap_checked_ids"))
+{
+    var _ap_checked_str = "[";
+    var _ap_checked_count = ds_list_size(global.ap_checked_ids);
+    var _ap_ck;
+    for (_ap_ck = 0; _ap_ck < _ap_checked_count; _ap_ck++)
+    {
+        if (_ap_ck > 0) _ap_checked_str += ",";
+        _ap_checked_str += string(global.ap_checked_ids[|_ap_ck]);
+    }
+    _ap_checked_str += "]";
+    _dm_save_data[?"_AP_Checked_IDs"] = _ap_checked_str;
+}
+
 /*
 show_debug_message("file_save(). "+"f.dm_kakusu size="+string(ds_map_size(f.dm_kakusu)));
 show_debug_message("file_save(). "+"f.dm_keys size="+string(ds_map_size(f.dm_keys)));

@@ -12,6 +12,7 @@ eyes_type = 1; // 1: EYES1(OG), 2: EYES2(cyclops)
 
 
 
+ap_kakusu_index = 9; // KAKUSU09: Maze Island
 Kakusu_init2();
 
 

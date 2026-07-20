@@ -5,7 +5,7 @@ with(argument0)
 {
     //db_pbag_rising_xp_1a();
     can_draw_self = false;
-    
+
     // DD6C
     if (timer)
     {
@@ -18,7 +18,7 @@ with(argument0)
     // DDEC
     else
     {
-        if (xp 
+        if (xp
         && !drop_item_obj )
         {
             var _XP  = xp;
@@ -26,7 +26,7 @@ with(argument0)
             //
             f.xpPending += _XP;
             f.xpPending &= $FFFF;
-            
+
             xp = max(0,xp-_XP);
         }
     }

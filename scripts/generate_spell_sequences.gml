@@ -100,8 +100,37 @@ for(_i=0; _i<_SPELL_SEQUENCE_COUNT; _i++)
         }
         ds_list_shuffle(_dl_seq);
         */
-        
-        
+
+
+        // AP: the apworld is the source of truth
+        if (global.AP_connected
+        &&  variable_global_exists("ap_spell_sequences")
+        && !is_undefined(global.ap_spell_sequences)
+        &&  ds_exists(global.ap_spell_sequences, ds_type_map))
+        {
+            var _ap_seq_str = ds_map_find_value(global.ap_spell_sequences, hex_str(_i+1));
+            if (!is_undefined(_ap_seq_str) && is_string(_ap_seq_str) && _ap_seq_str!="")
+            {
+                ds_list_clear(_dl_seq);
+                var _ap_rem = _ap_seq_str; // "|"-delimited AP spell item names
+                while (string_length(_ap_rem) > 0)
+                {
+                    var _ap_bar = string_pos("|", _ap_rem);
+                    var _ap_tok;
+                    if (_ap_bar == 0) { _ap_tok = _ap_rem; _ap_rem = ""; }
+                    else { _ap_tok = string_copy(_ap_rem,1,_ap_bar-1); _ap_rem = string_delete(_ap_rem,1,_ap_bar); }
+
+                    var _ap_gml_name = ap_name_to_gml(_ap_tok); // "Spell: Reflect" -> STR_REFLECT
+                    if (_ap_gml_name != "")
+                    {
+                        var _ap_bit = g.dm_Spell[?STR_Bit + _ap_gml_name];
+                        if (!is_undefined(_ap_bit)) ds_list_add(_dl_seq, _ap_bit);
+                    }
+                }
+            }
+        }
+
+
         _count = ds_list_size(_dl_seq);
             _str   = "";
             _str2  = "";

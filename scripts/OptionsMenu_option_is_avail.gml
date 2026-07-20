@@ -52,6 +52,7 @@ switch(argument0)
         //case DevTools.INVULNERABILITY:{return DEV; break;}
         case DevTools.PC_DASH:        {return true; break;}
         //case DevTools.PC_DASH:        {return DEV; break;}
+        case DevTools.GODMODE:        {return DEV; break;}
         case DevTools.BGR_COLOR:      {return true; break;}
         case DevTools.ROOM_COLOR:     {return true; break;}
         case DevTools.BACK:           {return true; break;}

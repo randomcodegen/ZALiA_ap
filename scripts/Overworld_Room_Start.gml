@@ -30,6 +30,7 @@ pc_step_counter = 1;
 move_spd        = 0; // 0: no movement
 move_x          = 0;
 move_y          = 0;
+move_step       = 1;
 move_speed      = 0.0;
 move_distance   = 0.0;
 
@@ -140,7 +141,16 @@ if (f.items&(ITM_MAP1|ITM_MAP2))
     {
         _item_id   =    g.dl_MapItem_ITEM_IDS[|_i];
         _item_type = string(val(g.dm_spawn[?_item_id+STR_Item+STR_Type]));
-        
+
+        // The AP-aware rando markers (ItemAcquiredIndicator) now
+        if (_item_type != STR_Kakusu
+        && (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations])
+        ||  val(global.dm_save_file_settings[?STR_Randomize+STR_PBAG+STR_Locations])
+        ||  val(global.dm_save_file_settings[?STR_Randomize+STR_Key +STR_Locations]) ))
+        {
+            continue;//_i
+        }
+
         if (_item_type==STR_KEY)
         {
             if(!val(global.dm_save_file_settings[?STR_Randomize+STR_Key+STR_Locations]) 
@@ -174,7 +184,13 @@ if (f.items&(ITM_MAP1|ITM_MAP2))
                 }
                 else
                 {   // CONTAINER PIECES, 1UPS, KEYS
-                    if (item_acquired(_item_id)) continue;//_i
+                    // AP mode: use checked list instead of local
+                    if (global.AP_connected && variable_global_exists("ap_checked_ids") && variable_global_exists("AP_location_map"))
+                    {
+                        var _ap_id2 = global.AP_location_map[?_spawn_datakey];
+                        if (!is_undefined(_ap_id2) && ds_list_find_index(global.ap_checked_ids, _ap_id2) != -1) continue;
+                    }
+                    else if (item_acquired(_item_id)) continue;//_i
                 }
                 
                 _rm_name = val(g.dm_spawn[?_spawn_datakey+STR_Rm+STR_Name], "undefined");
@@ -227,7 +243,76 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
     {
         _c1 = false;
         _acquired = false;
+        _rm_name = undefined;
         _datakey = STR_Location+hex_str(_i);
+
+        // Resolve the authoritative AP id and confirm
+        var _ap_loc_id = 387642575169 + (_i - 1);
+        var _ap_loc_desc = f.dm_rando[?_datakey+STR_Description];
+        var _ap_loc_valid = true;
+        var _ap_loc_map_ready = global.AP_connected
+            && variable_global_exists("ap_location_name_to_id")
+            && !is_undefined(global.ap_location_name_to_id)
+            && global.ap_location_name_to_id != -1;
+        if (_ap_loc_map_ready)
+        {
+            _ap_loc_valid = false;
+            var _ap_is_kakusu = !is_undefined(_ap_loc_desc)
+                && string_pos("Kakusu ",_ap_loc_desc) == 1;
+
+            // Individual Kakusu checks are AP-only and
+            if (_ap_is_kakusu
+            &&  variable_global_exists("ap_kakusu_selected")
+            && !is_undefined(global.ap_kakusu_selected)
+            &&  variable_global_exists("ap_kakusu_id_by_index")
+            && !is_undefined(global.ap_kakusu_id_by_index))
+            {
+                var _ap_kak_idx = real(string_copy(_ap_loc_desc,8,
+                    string_length(_ap_loc_desc)-7));
+                var _ap_kak_selected = ds_map_find_value(global.ap_kakusu_selected,
+                    string(_ap_kak_idx));
+                var _ap_kak_id = ds_map_find_value(global.ap_kakusu_id_by_index,
+                    string(_ap_kak_idx));
+                if (!is_undefined(_ap_kak_selected) && !is_undefined(_ap_kak_id))
+                {
+                    _ap_loc_id = real(_ap_kak_id);
+                    _ap_loc_valid = true;
+                    if (variable_global_exists("ap_id_to_location_name")
+                    && !is_undefined(global.ap_id_to_location_name))
+                    {
+                        var _ap_kak_name = ds_map_find_value(global.ap_id_to_location_name,
+                            _ap_loc_id);
+                        if (!is_undefined(_ap_kak_name)) _ap_loc_desc = _ap_kak_name;
+                    }
+                }
+            }
+            else if (!is_undefined(_ap_loc_desc) && _ap_loc_desc != "")
+            {
+                var _ap_loc_mapped = ds_map_find_value(global.ap_location_name_to_id, _ap_loc_desc);
+                if (!is_undefined(_ap_loc_mapped))
+                {
+                    _ap_loc_id = real(_ap_loc_mapped);
+                    _ap_loc_valid = true;
+                }
+            }
+            if (!_ap_loc_valid && !_ap_is_kakusu)
+            {
+                var _ap_rev_name = ds_map_find_first(global.ap_location_name_to_id);
+                while (!is_undefined(_ap_rev_name))
+                {
+                    var _ap_rev_id = real(global.ap_location_name_to_id[?_ap_rev_name]);
+                    if (_ap_rev_id == _ap_loc_id)
+                    {
+                        _ap_loc_desc = _ap_rev_name;
+                        _ap_loc_id = _ap_rev_id;
+                        _ap_loc_valid = true;
+                        break;
+                    }
+                    _ap_rev_name = ds_map_find_next(global.ap_location_name_to_id, _ap_rev_name);
+                }
+            }
+        }
+        if (!_ap_loc_valid) continue;
         _item_id = f.dm_rando[?_datakey+STR_Item+STR_ID+STR_Randomized];
         if(!is_undefined(_item_id))
         {
@@ -240,35 +325,65 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
             
             if (_c1)
             {
+                // Anchor the mark to THIS location, not to
                 _spawn_datakey = g.dm_spawn[?_item_id+STR_Spawn+STR_Datakey+STR_Randomized];
-                if(!is_undefined(_spawn_datakey))
-                {
+                if(!is_undefined(_spawn_datakey) && _spawn_datakey!="undefined")
                     _rm_name = g.dm_spawn[?_spawn_datakey+STR_Rm+STR_Name];
-                    if(!is_undefined(_rm_name))
-                    {
-                        //_owrc = dm[?_rm_name+STR_OWRC];
-                        _owrc = g.dm_rm[?_rm_name+STR_OWRC];
-                        _owrc = val(f.dm_rando[?_rm_name+STR_OWRC], _owrc);
-                        if(!is_undefined(_owrc))
-                        {
-                            _owrc_ = hex_str(_owrc);
-                            
-                            _acquired = sign(item_acquired(_item_id));
-                            dm_rando_locations[?_datakey+STR_OWRC] = _owrc;
-                            dm_rando_locations[?_datakey+STR_Acquired] = _acquired;
-                            
-                            _count1 = val(dm_rando_locations[?_owrc_+STR_Item+STR_Count]) + 1;
-                            dm_rando_locations[?_owrc_+STR_Item+STR_Count] = _count1;
-                            
-                            _count2 = val(dm_rando_locations[?_owrc_+STR_Acquired+STR_Count]) + _acquired;
-                            dm_rando_locations[?_owrc_+STR_Acquired+STR_Count] = _count2;
-                            
-                            
-                            if (is_undefined(_dm1[?_owrc_]))        _dm1[?_owrc_]  = $0000;
-                                 if (string_pos(STR_PBAG,_item_id)) _dm1[?_owrc_] |= $0100;
-                            else if (string_pos(STR_KEY, _item_id)) _dm1[?_owrc_] |= $0010;
-                            else                                    _dm1[?_owrc_] |= $0001;
-                            if (bitCount(val(_dm1[?_owrc_]))>1) dm_rando_locations[?_owrc_+STR_Varied] = true;
+                // Individual Kakusu checks spawn their reward via
+                if (is_undefined(_rm_name))
+                    _rm_name = f.dm_rando[?_datakey+STR_Rm+STR_Name];
+            }
+        }
+
+        // A real AP-created location may have no
+        if (is_undefined(_item_id) && global.AP_connected
+        &&  variable_global_exists("ap_scouted_flags"))
+        {
+            var _missing_home = f.dm_rando[?_datakey+STR_Rm+STR_Name];
+            if (!is_undefined(_missing_home)
+            && !is_undefined(global.ap_scouted_flags[?_ap_loc_id]))
+            {
+                _c1 = true;
+                _rm_name = _missing_home;
+                // Kasuto Swamp cave 1b has no direct overworld
+                if (_missing_home == Area_EastA+'0C') _rm_name = Area_EastA+'0B';
+            }
+        }
+
+        if (!is_undefined(_rm_name))
+        {
+            _owrc = g.dm_rm[?_rm_name+STR_OWRC];
+            _owrc = val(f.dm_rando[?_rm_name+STR_OWRC], _owrc);
+            if(!is_undefined(_owrc))
+            {
+                _owrc_ = hex_str(_owrc);
+                
+                // AP mode: count checked locations, not locally
+                if (global.AP_connected && variable_global_exists("ap_checked_ids"))
+                {
+                    _acquired = sign(ds_list_find_index(global.ap_checked_ids, _ap_loc_id) != -1);
+                }
+                else
+                {
+                    _acquired = sign(item_acquired(_item_id));
+                }
+                dm_rando_locations[?_datakey+STR_OWRC] = _owrc;
+                dm_rando_locations[?_datakey+"_AP_ID"] = _ap_loc_id;
+                dm_rando_locations[?_datakey+"_AP_DESC"] = _ap_loc_desc;
+                dm_rando_locations[?_datakey+STR_Acquired] = _acquired;
+                
+                _count1 = val(dm_rando_locations[?_owrc_+STR_Item+STR_Count]) + 1;
+                dm_rando_locations[?_owrc_+STR_Item+STR_Count] = _count1;
+                
+                _count2 = val(dm_rando_locations[?_owrc_+STR_Acquired+STR_Count]) + _acquired;
+                dm_rando_locations[?_owrc_+STR_Acquired+STR_Count] = _count2;
+                
+                
+                if (is_undefined(_dm1[?_owrc_]))        _dm1[?_owrc_]  = $0000;
+                     if (!is_undefined(_item_id) && string_pos(STR_PBAG,_item_id)) _dm1[?_owrc_] |= $0100;
+                else if (!is_undefined(_item_id) && string_pos(STR_KEY, _item_id)) _dm1[?_owrc_] |= $0010;
+                else                                    _dm1[?_owrc_] |= $0001;
+                if (bitCount(val(_dm1[?_owrc_]))>1) dm_rando_locations[?_owrc_+STR_Varied] = true;
                             /*
                             _str  = "item: "+string(val(_item_id));
                             _str += string_repeat(" ",$A-string_length(string(val(_item_id))));
@@ -279,13 +394,47 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
                             sdm(_str);
                             if!(_i&$3) sdm("");
                             */
-                        }
-                    }
-                }
             }
         }
     }
-    
+
+    // TEMP DEBUG: trace every Parapa-content location and
+    if (global.AP_connected && variable_global_exists("ap_checked_ids"))
+    {
+        show_debug_message("AP_OWCOUNT_DBG: server_raw=" + apclient_get_checked_locations());
+        for (var _dbg_i = 1; _dbg_i <= _count; _dbg_i++)
+        {
+            var _dbg_dk = STR_Location+hex_str(_dbg_i);
+            var _dbg_home = val(f.dm_rando[?_dbg_dk+STR_Rm+STR_Name], "");
+            if (string_copy(_dbg_home,1,AreaID_LEN) == Area_PalcA)
+            {
+                var _dbg_desc = val(dm_rando_locations[?_dbg_dk+"_AP_DESC"],
+                    val(f.dm_rando[?_dbg_dk+STR_Description], "undef"));
+                var _dbg_item = val(f.dm_rando[?_dbg_dk+STR_Item+STR_ID+STR_Randomized], "undef");
+                var _dbg_owrc = val(dm_rando_locations[?_dbg_dk+STR_OWRC], -1);
+                var _dbg_apid = val(dm_rando_locations[?_dbg_dk+"_AP_ID"], -1);
+                var _dbg_checked = sign(_dbg_apid > 0 && ds_list_find_index(global.ap_checked_ids,_dbg_apid) != -1);
+                var _dbg_scout_name = "undef";
+                if (_dbg_apid > 0 && variable_global_exists("ap_scouted_item_names"))
+                    _dbg_scout_name = val(global.ap_scouted_item_names[?_dbg_apid], "undef");
+                var _dbg_group_total = 0;
+                var _dbg_group_checked = 0;
+                if (_dbg_owrc != -1)
+                {
+                    var _dbg_owrc_key = hex_str(_dbg_owrc);
+                    _dbg_group_total = val(dm_rando_locations[?_dbg_owrc_key+STR_Item+STR_Count]);
+                    _dbg_group_checked = val(dm_rando_locations[?_dbg_owrc_key+STR_Acquired+STR_Count]);
+                }
+                show_debug_message("AP_OWCOUNT_DBG: loc#$"+hex_str(_dbg_i)
+                    +" desc='"+string(_dbg_desc)+"' home='"+string(_dbg_home)
+                    +"' native='"+string(_dbg_item)+"' owrc=$"+hex_str(_dbg_owrc)
+                    +" apid="+string(_dbg_apid)+" checked="+string(_dbg_checked)
+                    +" scout='"+string(_dbg_scout_name)+"' group="
+                    +string(_dbg_group_checked)+"/"+string(_dbg_group_total));
+            }
+        }
+    }
+
     ds_map_destroy(_dm1); _dm1=undefined;
 }
 

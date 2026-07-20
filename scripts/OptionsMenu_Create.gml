@@ -390,6 +390,7 @@ enum DevTools
     DUNGEON_MAP,      // Full dungeon map
     ADD_ITEMS,        // Add items by stabbing them
     PC_DASH,          // Toggle ability to move faster
+    GODMODE, // Block all incoming damage & instant-death
     //INVULNERABILITY,  // Invulnerability state
     BGR_COLOR,        // Edit background color
     ROOM_COLOR,       // Edit scene colors
@@ -489,6 +490,10 @@ DevTools_dg[#_i,1] = _font;
              _i=DevTools.PC_DASH;
 DevTools_dg[#_i,0] = "FASTER MOVEMENT SPEED";
 //DevTools_dg[#_i,0] = "FASTER PC HSPD";
+DevTools_dg[#_i,1] = _font;
+//                                                                          //
+             _i=DevTools.GODMODE;
+DevTools_dg[#_i,0] = "GODMODE";
 DevTools_dg[#_i,1] = _font;
 //                                                                          //
 /*

@@ -79,6 +79,7 @@ for(_i=0; _i<DevTools.COUNT; _i++)
     case DevTools.DUNGEON_MAP:    {_text=_dg_state_text[#2,sign(g.dev_DungeonMapShowAll)]; break;}
     case DevTools.ADD_ITEMS:      {_text=_dg_state_text[#0,sign(g.use_StabToCheat)]; break;}
     case DevTools.PC_DASH:        {_text=_dg_state_text[#0,sign(g.DevDash_state)]; break;} // 0: Off, 1: On, 2: On and dash input held
+    case DevTools.GODMODE:        {_text=_dg_state_text[#0,sign(g.dev_godmode)]; break;}
     //case DevTools.INVULNERABILITY:{_text=string(g.dev_invState&$F); break;}
     }//switch(_i)
     

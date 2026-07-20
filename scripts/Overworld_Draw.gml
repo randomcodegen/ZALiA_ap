@@ -36,7 +36,7 @@ var _DEBUG_ENC = DEV && false;
 var _i,_j, _idx, _count1;
 var _x,_y, _xl,_yt;
 var _ow_clm,_ow_row;
-var _spr, _pi, _text;
+var _spr, _pi, _spi, _sub, _text;
 var _datakey1;
 var _tid, _tsrc;
 
@@ -322,7 +322,11 @@ if (ItemAcquiredIndicator_can_draw)
             _spr = val(dm_rando_locations[?_datakey1+STR_Sprite], spr_0);
             _x   = val(dm_rando_locations[?_datakey1+"_X"]);
             _y   = val(dm_rando_locations[?_datakey1+"_Y"]);
-            draw_sprite_(_spr,0, _x,_y-1);
+            // Real item art is index-palette and needs a
+            _spi = val(dm_rando_locations[?_datakey1+STR_Palette], 0);
+            // Sub-image: cross-world AP-logo frame (0 neither /
+            _sub = val(dm_rando_locations[?_datakey1+STR_Image], 0);
+            draw_sprite_(_spr,_sub, _x,_y-1, _spi);
             
             _text = dm_rando_locations[?_datakey1+STR_Text];
             if(!is_undefined(_text))

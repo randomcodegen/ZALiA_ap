@@ -44,19 +44,29 @@ var _HELD0 =  _CTL &&  _SHF &&  _ALT; // CTL + SHF + ALT held
 // ----------------------------------------------------------------------------
 // --------------------------------------------------------------------
 // Give PC faster hspd
+var _dbg_dash_state_prev = g.DevDash_state;
+// ogr (on-ground) only matters in action rooms
+var _dbg_pc_ogr = 0;
+if (global.pc != noone && g.room_type != "C") _dbg_pc_ogr = global.pc.ogr;
+
 if (GP_Other6_held    // GP_Other6: trig R
-&&  g.DevTools_state 
+&&  g.DevTools_state
 &&  g.DevDash_state   // g.DevDash_state: toggle in options menu
-&& !g.app_paused 
-&& !global.pc.ogr )        // pc on ground
+&& !g.app_paused
+&& !_dbg_pc_ogr )     // pc NOT on ground (skipped on overworld)
 {
     g.DevDash_state = 2; // 0: Off, 1: On, 2: On and dash input held
+    g.DevDash_timer = 5; // grace period so brief input drops
+}
+else if (g.DevDash_state == 2 && g.DevDash_timer > 0)
+{
+    g.DevDash_timer--; // keep state=2 through brief input drops
 }
 else
 {
     g.DevDash_state = sign(g.DevDash_state); // 0 or 1. // 0: Off, 1: On, 2: On and dash input held
+    g.DevDash_timer = 0;
 }
-
 
 
 

@@ -45,8 +45,8 @@ with(instance_create(_XL,_YT, _OBJECT))
     {   // _val examples: "010204", "01", "02"
         // This instance is qualified for ANY quest if there's no data
         _val = g.dm_spawn[?dk_spawn+STR_Qualified+STR_Quest+STR_Nums];
-        if(!is_undefined(_val) 
-        &&  is_string(   _val) 
+        if(!is_undefined(_val)
+        &&  is_string(   _val)
         && !string_pos(hex_str(f.quest_num),_val) )
         {
             state = 0;
@@ -251,9 +251,9 @@ with(instance_create(_XL,_YT, _OBJECT))
     update_body_hb_1a();
     
     
-    if (g.town_name==STR_Bulblin 
-    &&  global.pc.Disguise_enabled 
-    //&&  f.items&ITM_MASK 
+    if (g.town_name==STR_Bulblin
+    &&  global.pc.Disguise_enabled
+    //&&  f.items&ITM_MASK
     &&  is_ancestor(object_index,GOB1) )
     {
         state = 0;

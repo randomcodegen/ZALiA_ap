@@ -41,7 +41,50 @@ ds_list_add(dl_list1,STR_Old_Kasuto);
 //ds_list_add(dl_list1,STR_Bulblin);
 
 ds_list_copy(dl_list2,dl_list1);
-ds_list_shuffle(dl_list2);
+
+// dl_list1[_i] is the overworld POSITION; dl_list2[_i]
+if (variable_global_exists("ap_town_position") && !is_undefined(global.ap_town_position)
+&&  ds_exists(global.ap_town_position, ds_type_map))
+{
+    var _apToStr = ds_map_create();
+    _apToStr[?"Rauru"]      = STR_Rauru;
+    _apToStr[?"Ruto"]       = STR_Ruto;
+    _apToStr[?"Saria"]      = STR_Saria;
+    _apToStr[?"Mido"]       = STR_Mido;
+    _apToStr[?"Nabooru"]    = STR_Nabooru;
+    _apToStr[?"Darunia"]    = STR_Darunia;
+    _apToStr[?"New Kasuto"] = STR_New_Kasuto;
+    _apToStr[?"Old Kasuto"] = STR_Old_Kasuto;
+    _apToStr[?"Bulblin"]    = STR_Bulblin;
+
+    // Invert town_position (content -> position) into
+    var _posToContent = ds_map_create();
+    var _apKey = ds_map_find_first(global.ap_town_position);
+    while (!is_undefined(_apKey))
+    {
+        var _contentStr = _apToStr[?_apKey];
+        var _posStr     = _apToStr[?global.ap_town_position[?_apKey]];
+        if (!is_undefined(_contentStr) && !is_undefined(_posStr))
+        {
+            _posToContent[?_posStr] = _contentStr;
+        }
+        _apKey = ds_map_find_next(global.ap_town_position, _apKey);
+    }
+
+    var _dl_list2_COUNT = ds_list_size(dl_list1);
+    for (_i=0; _i<_dl_list2_COUNT; _i++)
+    {
+        var _content = _posToContent[?dl_list1[|_i]];
+        if (!is_undefined(_content)) dl_list2[|_i] = _content;
+    }
+
+    ds_map_destroy(_apToStr);
+    ds_map_destroy(_posToContent);
+}
+else
+{
+    ds_list_shuffle(dl_list2);
+}
 
 if(_Z3){
 show_debug_message("g.OWRC_TOWN_RAUR1 $"+hex_str(g.OWRC_TOWN_RAUR1));

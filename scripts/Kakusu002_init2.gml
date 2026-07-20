@@ -13,6 +13,7 @@ BODY1_SPR_SQSH = spr_Slime_Transparent_1b_WRB;
 BODY1_SPR_BALL = spr_Slime_Transparent_1c_WRB;
 
 
+ap_kakusu_index = 4; // KAKUSU04: DthMt bridge
 Kakusu_init2();
 
 

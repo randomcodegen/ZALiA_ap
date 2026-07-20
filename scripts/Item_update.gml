@@ -27,9 +27,11 @@ switch(sub_state)
     
     
     // E51E. ITEM_TYPE: "A":Major items, "B":Heart/Magic containers, "C":Quest items, "G":Extra Life Doll
-    if (IS_HOLD_ITEM 
-    &&  cs&CS_BD1 
-    && !global.pc.ogr 
+    var _ogr_ok = !global.pc.ogr;
+
+    if (IS_HOLD_ITEM
+    &&  cs&CS_BD1
+    &&  _ogr_ok
     && !global.pc.HoldItem_timer )
     {   // E726, E538: JSR E771
         Item_update_1(); // E771
@@ -64,6 +66,7 @@ switch(sub_state)
         || (global.pc.SwordHB2_colliding==id && isVal(ITEM_TYPE,STR_KEY,STR_JAR,STR_PBAG)) )
         {
             Item_update_1(); // E771
+            
             stun_timer = STUN_DURATION1; // $30
             aud_play_sound(get_audio_theme_track(dk_StrikeEnemy));
             

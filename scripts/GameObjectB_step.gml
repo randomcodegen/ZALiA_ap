@@ -109,6 +109,20 @@ switch(state)
                     dk_spawn = other.Item_SPAWN_DATAKEY;
                     ITEM_ID  = other.Item_ITEM_ID;
                     IS_DROP  = true;
+
+                    // AP cross-world items: Carock caught one of
+                    if (object_index == obj_ap_item_filler
+                    ||  object_index == obj_ap_item_useful
+                    ||  object_index == obj_ap_item_prog)
+                    {
+                        ITEM_TYPE     = STR_PBAG;
+                        SPAWN_DATAKEY = dk_spawn;
+                        GO_sprite_init(object_get_sprite(object_index));
+                        ap_loc_id = undefined;
+                        if (variable_global_exists("AP_location_map") && !is_undefined(dk_spawn))
+                            ap_loc_id = global.AP_location_map[?dk_spawn];
+                    }
+
                     aud_play_sound(get_audio_theme_track(dk_ItemDrop));
                 }
             }

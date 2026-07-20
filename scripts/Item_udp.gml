@@ -118,6 +118,46 @@ if (g.mod_MedicinePlantItem
     GO_set_sprite(id,g.FlowerItemAnim_SPR1);
 }
 
+// AP: apply scouted sprite + item type once
+if (sprite_index != spr_AP_Logo
+&&  sub_state != sub_state_HELD
+&&  global.AP_connected
+&&  variable_global_exists("ap_scouted_item_types")
+&&  variable_global_exists("AP_location_map")
+&&  !is_undefined(SPAWN_DATAKEY))
+{
+    var _ap_id = global.AP_location_map[?SPAWN_DATAKEY];
+    if (!is_undefined(_ap_id))
+    {
+        var _scouted_type = global.ap_scouted_item_types[?_ap_id];
+        if (!is_undefined(_scouted_type) && _scouted_type != "")
+        {
+            ITEM_TYPE = _scouted_type;
+            var _scouted_spr = global.ap_scouted_sprites[?_ap_id];
+            if (!is_undefined(_scouted_spr) && _scouted_spr > 0)
+                GO_set_sprite_index(_scouted_spr);
+            // For keys, set ITEM_ID so Item_draw shows
+            if (string_pos(STR_KEY, _scouted_type) == 1)
+            {
+                var _palace = string_copy(_scouted_type, string_length(STR_KEY) + 1, 2);
+                ITEM_ID = STR_KEY + _palace + "01";
+            }
+        }
+        else
+        {
+            var _scout_flags = global.ap_scouted_flags[?_ap_id];
+            if (!is_undefined(_scout_flags) && _scout_flags > 0)
+            {
+                GO_set_sprite_index(spr_AP_Logo);
+                // Flags are a bitmask (prog=0b01, useful=0b10) and
+                if      (_scout_flags & 1) image_index = 2;
+                else if (_scout_flags & 2) image_index = 1;
+                else image_index = 0;
+            }
+        }
+    }
+}
+
 
 
 

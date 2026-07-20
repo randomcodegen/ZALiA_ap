@@ -125,6 +125,24 @@ ds_map_clear(f.dm_quests);
 
 ds_map_copy(global.dm_save_file, _dm_file_data);
 
+// AP saves: require conn + matching seed, else
+var _ap_seed_saved = _dm_file_data[?"_AP_Seed"];
+if (!is_undefined(_ap_seed_saved))
+{
+    if (!global.AP_connected)
+    {
+        show_message("This save file requires an Archipelago connection.#Please connect to the AP server and try again.");
+        goto_title_rm();
+        exit;
+    }
+    if (global.ap_seed != _ap_seed_saved)
+    {
+        show_message("This save file is for a different Archipelago seed.#Please use the correct save file or connect to the correct server.");
+        goto_title_rm();
+        exit;
+    }
+}
+
 ds_map_clear(global.dm_save_file_settings);
 var _dm_save_file_settings_ENCODED = global.dm_save_file[?STR_Save+STR_File+STR_Settings];
 if(!is_undefined(_dm_save_file_settings_ENCODED))
@@ -206,6 +224,173 @@ if (file_exists(_RANDO_DATA_FILE_NAME))
 
 
 
+// AP location map
+if (!variable_global_exists("AP_location_map"))
+{
+    global.AP_location_map = ds_map_create();
+}
+ds_map_clear(global.AP_location_map);
+var _loaded_map = false;
+var _AP_MAP_FILE_NAME = f.dl_FILE_NAME_PREFIX[|_FILE_NUM-1] + "_AP_Map.txt";
+if (file_exists(_AP_MAP_FILE_NAME))
+{
+    _file = file_text_open_read(working_directory + _AP_MAP_FILE_NAME);
+    _file_data = file_text_read_string(_file);
+    file_text_close(_file);
+    var _dm_ap_map = json_decode(_file_data);
+    if (_dm_ap_map != -1)
+    {
+        ds_map_copy(global.AP_location_map, _dm_ap_map);
+        ds_map_destroy(_dm_ap_map);
+        _loaded_map = true;
+    }
+}
+
+// Fallback: load map from embedded save data
+if (!_loaded_map)
+{
+    var _embedded_map = _dm_file_data[?"_AP_Location_Map"];
+    if (!is_undefined(_embedded_map) && is_string(_embedded_map) && _embedded_map != "")
+    {
+        var _dm_ap_map = json_decode(_embedded_map);
+        if (_dm_ap_map != -1)
+        {
+            ds_map_copy(global.AP_location_map, _dm_ap_map);
+            ds_map_destroy(_dm_ap_map);
+            _loaded_map = true;
+        }
+    }
+}
+
+if (!_loaded_map)
+    show_debug_message("AP: No AP map file found, AP_location_map is empty");
+
+if (_loaded_map)
+{
+    show_debug_message("AP: Loaded location map (" + string(ds_map_size(global.AP_location_map)) + " entries)");
+    show_debug_message("AP_REBUILD_CHECK: variable_global_exists(f)=" + string(variable_global_exists("f")));
+    // AP: Rebuild missing spawn-datakey entries from
+    if (variable_global_exists("f"))
+    {
+        var _dm_rando = f.dm_rando;
+        show_debug_message("AP_REBUILD_CHECK: _dm_rando=" + string(_dm_rando));
+        if (!is_undefined(_dm_rando))
+        {
+            var _COUNT = val(_dm_rando[?STR_Total+STR_Location+STR_Count]);
+            show_debug_message("AP_REBUILD: count=" + string(_COUNT) + " test loc=26 dk='" + string(_dm_rando[?STR_Location+hex_str(26)+STR_Spawn+STR_Datakey]) + "' item='" + string(_dm_rando[?STR_Location+hex_str(26)+STR_Item+STR_ID+STR_Randomized]) + "'");
+            var _added = 0;
+            var _i, _datakey1, _spawn_datakey, _item_id, _ap_id, _desc;
+            for (_i = 1; _i <= _COUNT; _i++)
+            {
+                _datakey1      = STR_Location+hex_str(_i);
+                _spawn_datakey = _dm_rando[?_datakey1+STR_Spawn+STR_Datakey];
+                _item_id       = _dm_rando[?_datakey1+STR_Item+STR_ID+STR_Randomized];
+                _desc          = _dm_rando[?_datakey1+STR_Description];
+                // AP: look up AP ID from description first
+                _ap_id = -1;
+                if (!is_undefined(_desc) && _desc != "" && variable_global_exists("ap_location_name_to_id") && !is_undefined(global.ap_location_name_to_id))
+                {
+                    var _raw = ds_map_find_value(global.ap_location_name_to_id, _desc);
+                    if (!is_undefined(_raw)) _ap_id = real(_raw);
+                }
+                // Fallback: calculate from loc_num
+                if (_ap_id <= 0) _ap_id = 387642575169 + (_i - 1);
+
+                // Always add item_id → ap_id entry
+                if (!is_undefined(_item_id) && is_string(_item_id) && _item_id != "" && _ap_id > 0)
+                {
+                    if (is_undefined(global.AP_location_map[?_item_id]))
+                    {
+                        global.AP_location_map[?_item_id] = _ap_id;
+                        _added++;
+                    }
+                }
+
+                // Add spawn_datakey entry (if available and not
+                if (!is_undefined(_spawn_datakey) && _spawn_datakey != "undefined" && _spawn_datakey != "" && _ap_id > 0)
+                {
+                    if (is_undefined(global.AP_location_map[?_spawn_datakey]))
+                    {
+                        global.AP_location_map[?_spawn_datakey] = _ap_id;
+                        if (!is_undefined(_desc)) global.AP_location_map[?_spawn_datakey + "_desc"] = _desc;
+                        _added++;
+                    }
+                }
+            }
+            if (_added > 0)
+                show_debug_message("AP: Added " + string(_added) + " missing spawn-datakey entries from rando data");
+            else
+                show_debug_message("AP_REBUILD: no entries added (all spawn datakeys already in map or item IDs not found)");
+        }
+    }
+    // Diagnostic: show first 5 keys to verify
+    var _dk = ds_map_find_first(global.AP_location_map);
+    var _cnt = 0;
+    while (!is_undefined(_dk) && _cnt < 5)
+    {
+        show_debug_message("  map[" + _dk + "] = " + string(global.AP_location_map[?_dk]));
+        _dk = ds_map_find_next(global.AP_location_map, _dk);
+        _cnt++;
+    }
+    // Check for _WestA_29_PRIO specifically
+    show_debug_message("  _WestA_29_PRIO00 = " + string(global.AP_location_map[?"_WestA_29_PRIO00"]));
+    show_debug_message("  _WestA_29_PRIO01 = " + string(global.AP_location_map[?"_WestA_29_PRIO01"]));
+}
+
+// Restore AP items received index (prevents re-grant
+var _ap_index_restore = _dm_file_data[?"_AP_Items_Received_Index"];
+if (!is_undefined(_ap_index_restore))
+{
+    global.ap_items_received_index = _ap_index_restore;
+    show_debug_message("AP: Restored items received index=" + string(_ap_index_restore));
+}
+
+// Restore count of 1-Up dolls received from
+global.ap_received_dolls = val(_dm_file_data[?"_AP_Received_Dolls"], 0);
+show_debug_message("AP: Restored received dolls=" + string(global.ap_received_dolls));
+
+// Restore checked IDs from save data — MERGE
+var _ap_checked_restore = _dm_file_data[?"_AP_Checked_IDs"];
+if (!global.AP_connected
+&& !is_undefined(_ap_checked_restore) && is_string(_ap_checked_restore)
+&& _ap_checked_restore != "" && _ap_checked_restore != "[]")
+{
+    var _arr = json_decode(_ap_checked_restore);
+    // GML 1.4 json_decode can return a ds_map
+    var _arr_list = _arr;
+    if (!ds_exists(_arr_list, ds_type_list) && ds_exists(_arr, ds_type_map))
+        _arr_list = _arr[?"default"];
+    if (ds_exists(_arr_list, ds_type_list) && ds_list_size(_arr_list) > 0)
+    {
+        var _ac_i, _ac_sz, _ac_added;
+        _ac_sz    = ds_list_size(_arr_list);
+        _ac_added = 0;
+        for (_ac_i = 0; _ac_i < _ac_sz; _ac_i++)
+        {
+            var _ac_val = real(_arr_list[|_ac_i]);
+            if (_ac_val > 0 && ds_list_find_index(global.ap_checked_ids, _ac_val) == -1)
+            {
+                ds_list_add(global.ap_checked_ids, _ac_val);
+                _ac_added++;
+            }
+        }
+        show_debug_message("AP: Merged " + string(_ac_added) + " checked IDs from save (" + string(_ac_sz) + " total in save, list now " + string(ds_list_size(global.ap_checked_ids)) + ")");
+    }
+    else
+    {
+        show_debug_message("AP: Failed to decode checked IDs from save: " + string(_ap_checked_restore));
+    }
+    if (ds_exists(_arr, ds_type_map))
+    {
+        if (_arr_list != _arr && ds_exists(_arr_list, ds_type_list)) ds_list_destroy(_arr_list);
+        ds_map_destroy(_arr);
+    }
+    else if (ds_exists(_arr, ds_type_list))
+    {
+        ds_list_destroy(_arr);
+    }
+}
+
 // Hints ---------------------------------------------------------
 ds_map_clear(g.dm_RandoHintsRecorder);
 var _dm_hints_ENCODED = f.dm_rando_full[?STR_Found+STR_Hint];
@@ -216,6 +401,20 @@ if(!is_undefined(_dm_hints_ENCODED))
     {
         ds_map_copy(g.dm_RandoHintsRecorder,_dm_hints);
         ds_map_destroy(_dm_hints); _dm_hints=undefined;
+    }
+}
+
+// Boulder Circle push-order clues live in
+var _bld_dk    = STR_Boulder+STR_Circle+STR_Order;
+var _bld_count = val(f.dm_quests[?_bld_dk+STR_Count], 0);
+var _bld_i, _bld_abbr;
+for(_bld_i=1; _bld_i<=_bld_count; _bld_i++)
+{
+    _bld_abbr = f.dm_quests[?_bld_dk+hex_str(_bld_i)+STR_Found];
+    if (!is_undefined(_bld_abbr))
+    {
+        g.dm_RandoHintsRecorder[?_bld_dk+STR_Count]       = _bld_count;
+        g.dm_RandoHintsRecorder[?_bld_dk+hex_str(_bld_i)] = _bld_abbr;
     }
 }
 
@@ -364,7 +563,8 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
         
         _spawn_datakey = f.dm_rando[?_datakey1+STR_Spawn+STR_Datakey];
         _item_id       = f.dm_rando[?_datakey1+STR_Item+STR_ID+STR_Randomized];
-        if(!is_undefined(_spawn_datakey) 
+        if(!is_undefined(_spawn_datakey)
+        && _spawn_datakey != "undefined"
         && !is_undefined(_item_id) )
         {
             g.dm_spawn[?_spawn_datakey+STR_Item+STR_ID+STR_Randomized] = _item_id;
@@ -473,6 +673,54 @@ ds_map_destroy(_dm_file_data); _dm_file_data=undefined;
 show_debug_message("");
 show_debug_message("FILE '"+_FILE_NAME+"'  LOADED!");
 //show_debug_message("file num "+string(f.file_num)+"  LOADED!");
+
+// AP: signal save fully loaded — items can
+global.ap_save_loaded = true;
+
+// Re-merge srv-confirmed checked locations. This handles
+if (global.AP_connected && variable_global_exists("ap_checked_ids"))
+{
+    // file_load may have run after slot conn
+    ds_list_clear(global.ap_checked_ids);
+    var _sv_checked = apclient_get_checked_locations();
+    var _sv_key  = "global.ap_checked_locations[";
+    var _sv_klen = string_length(_sv_key);
+    var _sv_raw  = _sv_checked;
+    var _sv_added = 0;
+    repeat(200)
+    {
+        var _sv_p = string_pos(_sv_key, _sv_raw);
+        if (_sv_p == 0) break;
+        _sv_raw = string_delete(_sv_raw, 1, _sv_p + _sv_klen - 1);
+        var _sv_eq = string_pos("]=", _sv_raw);
+        if (_sv_eq == 0) break;
+        _sv_raw = string_delete(_sv_raw, 1, _sv_eq + 1);
+        var _sv_semi = string_pos(";", _sv_raw);
+        if (_sv_semi == 0) break;
+        var _sv_val = real(string_copy(_sv_raw, 1, _sv_semi - 1));
+        _sv_raw = string_delete(_sv_raw, 1, _sv_semi);
+        if (_sv_val > 0 && ds_list_find_index(global.ap_checked_ids, _sv_val) == -1)
+        {
+            ds_list_add(global.ap_checked_ids, _sv_val);
+            _sv_added++;
+        }
+    }
+    show_debug_message("AP: Post-load server rebuild: " + string(_sv_added) + " checked IDs");
+}
+
+// AP: file_load just overwrote f.dm_rando with the
+if (global.AP_connected
+    && variable_global_exists("ap_scouted_flags") && ds_map_size(global.ap_scouted_flags) >= 1)
+{
+    show_debug_message("AP: re-applying dynamic hints after save load");
+    ap_generate_hints();      // NPC item-location hints
+    ap_generate_zelda_hint(); // Zelda hint (decoupled so it applies
+    global.ap_hints_generated = true;
+}
+
+// Trigger pending-queue flush for items deferred
+if (variable_global_exists("ap_pending_ready"))
+    global.ap_pending_ready = true;
 show_debug_message("");
 
 

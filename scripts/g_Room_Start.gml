@@ -1646,6 +1646,18 @@ if (_ROOM_A)
                 {
                     g.dm_RandoHintsRecorder[?STR_Hint+hex_str(_i)+STR_Item+STR_Found] = item_acquired(_item_id);
                 }
+
+                // Retroactively upgrade already-found hints to the
+                if (!is_undefined(g.dm_RandoHintsRecorder[?STR_Hint+hex_str(_i)+STR_Dialogue]))
+                {
+                    var _hint_full = f.dm_rando[?STR_Rando+STR_Hint+hex_str(_i)+STR_Dialogue+"FULL"];
+                    if (!is_undefined(_hint_full) && is_string(_hint_full) && _hint_full != "")
+                    {
+                        _hint_full = string_replace_all(_hint_full,"<"," ");
+                        _hint_full = string_replace_all(_hint_full,">"," ");
+                        g.dm_RandoHintsRecorder[?STR_Hint+hex_str(_i)+STR_Dialogue] = _hint_full;
+                    }
+                }
             }
         }
     }

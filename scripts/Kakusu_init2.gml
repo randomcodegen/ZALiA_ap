@@ -4,6 +4,10 @@
 var _i, _val, _len, _pos;
 
 
+// AP Kakusu loc index (1-12)
+if (!variable_instance_exists(id, "ap_kakusu_index")) { ap_kakusu_index = 0; }
+
+
     TEST_A1 = false;
 if (TEST_A1)
 {
