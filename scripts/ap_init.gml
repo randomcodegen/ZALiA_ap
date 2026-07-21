@@ -28,6 +28,7 @@
     global.ap_created_location_ids = ds_map_create();
     global.ap_created_location_indices = ds_map_create();
     global.ap_created_manifest_ready = false;
+    global.ap_created_manifest_error = false;
     global.ap_location_manifest_version = 0;
     // Which Kakusu indices were randomly chosen this seed
     global.ap_kakusu_selected = undefined;

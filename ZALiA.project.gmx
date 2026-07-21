@@ -15420,7 +15420,7 @@
       <script>scripts\ap_check_location.gml</script>
       <script>scripts\ap_apply_slot_data.gml</script>
       <script>scripts\ap_compute_location_checksum.gml</script>
-      <script>scripts\ap_load_loc_map_from_file.gml</script>
+      <script>scripts\ap_build_location_catalog_maps.gml</script>
       <script>scripts\ap_build_complete_map.gml</script>
       <script>scripts\ap_build_settings_string.gml</script>
       <script>scripts\ap_refresh_overworld_marks.gml</script>

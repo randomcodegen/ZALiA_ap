@@ -1,12 +1,13 @@
 /// ap_apply_slot_data(slot_data_json)
 {
     var _slot_data = argument0;
+    global.ap_created_manifest_error = false;
     var _dm = json_decode(_slot_data);
     if (_dm == -1)
     {
         show_debug_message("AP: Failed to parse slot_data (outer JSON too large for GMS 1.4 json_decode)");
         global.ap_slot_data = ds_map_create();
-        ap_load_loc_map_from_file();
+        global.ap_created_manifest_error = true;
         exit;
     }
 
@@ -28,9 +29,6 @@
         global.ap_seed = real(_seed_str);
         show_debug_message("AP: seed fallback (multiworld) = " + string(global.ap_seed));
     }
-
-    // Load location_name_to_id from file
-    ap_load_loc_map_from_file();
 
     // AP server holds info on which locations exist in this seed. 
     // Each hex character represents four consecutive location_num values,
@@ -63,18 +61,19 @@
             }
         }
         global.ap_created_manifest_ready = true;
+        ap_build_location_catalog_maps();
         show_debug_message("AP: authoritative location manifest loaded ("
             + string(ds_map_size(global.ap_created_location_ids)) + " created of "
             + string(_catalog_size) + ")");
     }
     else
     {
-        show_debug_message("AP: no authoritative location manifest; using legacy location-map compatibility");
+        global.ap_created_manifest_error = true;
+        show_debug_message("AP: slot rejected: authoritative location manifest is missing");
     }
 
     // Boss checks are virtual locations and are not part of the native GML
-    // location table.  Carry their authoritative AP ids in slot data so the
-    // game never depends on a generator-local zalia_loc_id_map.json file.
+    // location table. Carry their authoritative AP ids in slot data.
     if (variable_global_exists("ap_boss_item_location_ids")
     && !is_undefined(global.ap_boss_item_location_ids)
     && ds_exists(global.ap_boss_item_location_ids, ds_type_map))
