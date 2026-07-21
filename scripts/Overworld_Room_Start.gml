@@ -250,11 +250,20 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
         var _ap_loc_id = 387642575169 + (_i - 1);
         var _ap_loc_desc = f.dm_rando[?_datakey+STR_Description];
         var _ap_loc_valid = true;
+        var _ap_manifest_ready = global.AP_connected
+            && variable_global_exists("ap_created_manifest_ready")
+            && global.ap_created_manifest_ready;
+        if (_ap_manifest_ready)
+        {
+            var _manifest_id = ds_map_find_value(global.ap_created_location_indices, _i);
+            _ap_loc_valid = !is_undefined(_manifest_id);
+            if (_ap_loc_valid) _ap_loc_id = real(_manifest_id);
+        }
         var _ap_loc_map_ready = global.AP_connected
             && variable_global_exists("ap_location_name_to_id")
             && !is_undefined(global.ap_location_name_to_id)
             && global.ap_location_name_to_id != -1;
-        if (_ap_loc_map_ready)
+        if (!_ap_manifest_ready && _ap_loc_map_ready)
         {
             _ap_loc_valid = false;
             var _ap_is_kakusu = !is_undefined(_ap_loc_desc)
@@ -335,6 +344,18 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
             }
         }
 
+        // The server-created manifest decides whether this is a check. 
+        // Native randomized-item data only helps identify its physical spawn.
+        if (_ap_manifest_ready)
+        {
+            _c1 = true;
+            if (is_undefined(_rm_name))
+                _rm_name = f.dm_rando[?_datakey+STR_Rm+STR_Name];
+            // This cave's check lives in the side-view room but its map icon
+            // belongs to the adjacent overworld entrance.
+            if (_rm_name == Area_EastA+'0C') _rm_name = Area_EastA+'0B';
+        }
+
         // A real AP-created location may have no
         if (is_undefined(_item_id) && global.AP_connected
         &&  variable_global_exists("ap_scouted_flags"))
@@ -398,40 +419,54 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
         }
     }
 
-    // TEMP DEBUG: trace every Parapa-content location and
-    if (global.AP_connected && variable_global_exists("ap_checked_ids"))
+    // Boss-item checks are AP-only virtual locations, so the native location
+    // loop above cannot count them.  Attach one to each crystal palace's
+    // physical overworld tile when the option is enabled.
+    var _ap_boss_items_on = false;
+    if (global.AP_connected && variable_global_exists("ap_slot_data")
+    && !is_undefined(global.ap_slot_data))
     {
-        show_debug_message("AP_OWCOUNT_DBG: server_raw=" + apclient_get_checked_locations());
-        for (var _dbg_i = 1; _dbg_i <= _count; _dbg_i++)
+        var _ap_boss_opt = ds_map_find_value(global.ap_slot_data, "boss_item_locations");
+        _ap_boss_items_on = !is_undefined(_ap_boss_opt) && real(_ap_boss_opt);
+    }
+    if (_ap_boss_items_on)
+    {
+        var _ap_boss_dungeon, _ap_boss_id, _ap_boss_home, _ap_boss_key;
+        for (_ap_boss_dungeon = 1; _ap_boss_dungeon <= 6; _ap_boss_dungeon++)
         {
-            var _dbg_dk = STR_Location+hex_str(_dbg_i);
-            var _dbg_home = val(f.dm_rando[?_dbg_dk+STR_Rm+STR_Name], "");
-            if (string_copy(_dbg_home,1,AreaID_LEN) == Area_PalcA)
+            _ap_boss_id = undefined;
+            if (variable_global_exists("ap_boss_item_location_ids")
+            && !is_undefined(global.ap_boss_item_location_ids))
+                _ap_boss_id = ds_map_find_value(global.ap_boss_item_location_ids,
+                    string(_ap_boss_dungeon));
+            if (is_undefined(_ap_boss_id))
+                _ap_boss_id = 387642575169 + 192 + _ap_boss_dungeon;
+            if (_ap_manifest_ready
+            && is_undefined(ds_map_find_value(global.ap_created_location_ids, real(_ap_boss_id))))
+                continue;
+
+            switch (_ap_boss_dungeon)
             {
-                var _dbg_desc = val(dm_rando_locations[?_dbg_dk+"_AP_DESC"],
-                    val(f.dm_rando[?_dbg_dk+STR_Description], "undef"));
-                var _dbg_item = val(f.dm_rando[?_dbg_dk+STR_Item+STR_ID+STR_Randomized], "undef");
-                var _dbg_owrc = val(dm_rando_locations[?_dbg_dk+STR_OWRC], -1);
-                var _dbg_apid = val(dm_rando_locations[?_dbg_dk+"_AP_ID"], -1);
-                var _dbg_checked = sign(_dbg_apid > 0 && ds_list_find_index(global.ap_checked_ids,_dbg_apid) != -1);
-                var _dbg_scout_name = "undef";
-                if (_dbg_apid > 0 && variable_global_exists("ap_scouted_item_names"))
-                    _dbg_scout_name = val(global.ap_scouted_item_names[?_dbg_apid], "undef");
-                var _dbg_group_total = 0;
-                var _dbg_group_checked = 0;
-                if (_dbg_owrc != -1)
-                {
-                    var _dbg_owrc_key = hex_str(_dbg_owrc);
-                    _dbg_group_total = val(dm_rando_locations[?_dbg_owrc_key+STR_Item+STR_Count]);
-                    _dbg_group_checked = val(dm_rando_locations[?_dbg_owrc_key+STR_Acquired+STR_Count]);
-                }
-                show_debug_message("AP_OWCOUNT_DBG: loc#$"+hex_str(_dbg_i)
-                    +" desc='"+string(_dbg_desc)+"' home='"+string(_dbg_home)
-                    +"' native='"+string(_dbg_item)+"' owrc=$"+hex_str(_dbg_owrc)
-                    +" apid="+string(_dbg_apid)+" checked="+string(_dbg_checked)
-                    +" scout='"+string(_dbg_scout_name)+"' group="
-                    +string(_dbg_group_checked)+"/"+string(_dbg_group_total));
+                case 1: _ap_boss_home = Area_PalcA+'00'; break;
+                case 2: _ap_boss_home = Area_PalcB+'00'; break;
+                case 3: _ap_boss_home = Area_PalcC+'00'; break;
+                case 4: _ap_boss_home = Area_PalcD+'00'; break;
+                case 5: _ap_boss_home = Area_PalcE+'00'; break;
+                case 6: _ap_boss_home = Area_PalcF+'00'; break;
             }
+            _owrc = val(f.dm_rando[?_ap_boss_home+STR_OWRC],
+                g.dm_rm[?_ap_boss_home+STR_OWRC]);
+            if (is_undefined(_owrc)) continue;
+            _owrc_ = hex_str(_owrc);
+            _acquired = sign(ds_list_find_index(global.ap_checked_ids, real(_ap_boss_id)) != -1);
+            _ap_boss_key = "_AP_BOSS_ITEM_" + string(_ap_boss_dungeon);
+            dm_rando_locations[?_ap_boss_key+STR_OWRC] = _owrc;
+            dm_rando_locations[?_ap_boss_key+"_AP_ID"] = real(_ap_boss_id);
+            dm_rando_locations[?_ap_boss_key+STR_Acquired] = _acquired;
+            dm_rando_locations[?_owrc_+STR_Item+STR_Count]
+                = val(dm_rando_locations[?_owrc_+STR_Item+STR_Count]) + 1;
+            dm_rando_locations[?_owrc_+STR_Acquired+STR_Count]
+                = val(dm_rando_locations[?_owrc_+STR_Acquired+STR_Count]) + _acquired;
         }
     }
 

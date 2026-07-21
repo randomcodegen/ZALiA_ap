@@ -282,19 +282,32 @@ if (_loaded_map)
             var _i, _datakey1, _spawn_datakey, _item_id, _ap_id, _desc;
             for (_i = 1; _i <= _COUNT; _i++)
             {
+                if (variable_global_exists("ap_created_manifest_ready")
+                &&  global.ap_created_manifest_ready
+                &&  is_undefined(ds_map_find_value(global.ap_created_location_indices, _i)))
+                    continue;
+
                 _datakey1      = STR_Location+hex_str(_i);
                 _spawn_datakey = _dm_rando[?_datakey1+STR_Spawn+STR_Datakey];
                 _item_id       = _dm_rando[?_datakey1+STR_Item+STR_ID+STR_Randomized];
                 _desc          = _dm_rando[?_datakey1+STR_Description];
                 // AP: look up AP ID from description first
                 _ap_id = -1;
-                if (!is_undefined(_desc) && _desc != "" && variable_global_exists("ap_location_name_to_id") && !is_undefined(global.ap_location_name_to_id))
+                if (variable_global_exists("ap_created_manifest_ready")
+                &&  global.ap_created_manifest_ready)
+                {
+                    var _created_id = ds_map_find_value(global.ap_created_location_indices, _i);
+                    if (!is_undefined(_created_id)) _ap_id = real(_created_id);
+                }
+                else if (!is_undefined(_desc) && _desc != "" && variable_global_exists("ap_location_name_to_id") && !is_undefined(global.ap_location_name_to_id))
                 {
                     var _raw = ds_map_find_value(global.ap_location_name_to_id, _desc);
                     if (!is_undefined(_raw)) _ap_id = real(_raw);
                 }
                 // Fallback: calculate from loc_num
-                if (_ap_id <= 0) _ap_id = 387642575169 + (_i - 1);
+                if (_ap_id <= 0 && (!variable_global_exists("ap_created_manifest_ready")
+                || !global.ap_created_manifest_ready))
+                    _ap_id = 387642575169 + (_i - 1);
 
                 // Always add item_id → ap_id entry
                 if (!is_undefined(_item_id) && is_string(_item_id) && _item_id != "" && _ap_id > 0)
@@ -676,6 +689,7 @@ show_debug_message("FILE '"+_FILE_NAME+"'  LOADED!");
 
 // AP: signal save fully loaded — items can
 global.ap_save_loaded = true;
+global.ap_boss_item_backfill_done = false;
 
 // Re-merge srv-confirmed checked locations. This handles
 if (global.AP_connected && variable_global_exists("ap_checked_ids"))

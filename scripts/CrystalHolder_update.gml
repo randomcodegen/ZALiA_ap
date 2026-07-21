@@ -95,6 +95,16 @@ switch(counter) // 00AF[eIndex]
             if (_boss_items_on && _boss_item_loc_name != "")
             {
                 var _boss_ap_id = ds_map_find_value(global.ap_location_name_to_id, _boss_item_loc_name);
+                if (is_undefined(_boss_ap_id)
+                &&  variable_global_exists("ap_boss_item_location_ids")
+                && !is_undefined(global.ap_boss_item_location_ids))
+                    _boss_ap_id = ds_map_find_value(global.ap_boss_item_location_ids, string(DUNGEON_NUM));
+
+                // Compatibility for slots generated before boss ids travelled
+                // in slot data.  ap_check_location validates this fixed catalog
+                // id against the seed's authoritative created-location manifest.
+                if (is_undefined(_boss_ap_id) && DUNGEON_NUM >= 1 && DUNGEON_NUM <= 6)
+                    _boss_ap_id = 387642575169 + 192 + DUNGEON_NUM;
                 if (!is_undefined(_boss_ap_id))
                 {
                     var _boss_dk = STR_Crystal + STR_Item + hex_str(DUNGEON_NUM);

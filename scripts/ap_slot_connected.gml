@@ -2,6 +2,7 @@
 {
     show_debug_message("AP: Slot connected: " + string(argument0));
     global.AP_connected = true;
+    global.ap_boss_item_backfill_done = false;
     global.ap_ever_connected = true;
     ap_apply_slot_data(argument0);
 
@@ -59,7 +60,25 @@
     var _scout_ids = "[";
     var _loc_count = 0;
 
-    // Build the set of unselected-Kakusu ids
+    // A modern slot supplies the exact created-location set. Scout precisely
+    // that set; older slots retain the name-map/Kakusu compatibility path.
+    var _manifest_scout = false;
+    if (variable_global_exists("ap_created_manifest_ready")
+    &&  global.ap_created_manifest_ready
+    &&  ds_map_size(global.ap_created_location_ids) > 0)
+    {
+        var _created_id = ds_map_find_first(global.ap_created_location_ids);
+        while (!is_undefined(_created_id))
+        {
+            if (_loc_count > 0) _scout_ids += ",";
+            _scout_ids += string(_created_id);
+            _loc_count++;
+            _created_id = ds_map_find_next(global.ap_created_location_ids, _created_id);
+        }
+        _manifest_scout = true;
+    }
+
+    // Build the set of unselected-Kakusu ids for legacy slots.
     var _kak_exclude = ds_map_create();
     if (variable_global_exists("ap_kakusu_id_by_index") && !is_undefined(global.ap_kakusu_id_by_index)
         && ds_exists(global.ap_kakusu_id_by_index, ds_type_map)
@@ -90,7 +109,8 @@
     var _bi_len = string_length(_bi_suffix);
     var _scout_seen = ds_map_create();
 
-    if (variable_global_exists("ap_location_name_to_id") && !is_undefined(global.ap_location_name_to_id)
+    if (!_manifest_scout
+        && variable_global_exists("ap_location_name_to_id") && !is_undefined(global.ap_location_name_to_id)
         && global.ap_location_name_to_id != -1 && ds_map_size(global.ap_location_name_to_id) > 0)
     {
         var _mk = ds_map_find_first(global.ap_location_name_to_id);
@@ -116,7 +136,7 @@
     }
 
     // Selected individual Kakusu are AP-only locations
-    if (_loc_count > 0
+    if (!_manifest_scout && _loc_count > 0
     &&  variable_global_exists("ap_kakusu_selected")
     && !is_undefined(global.ap_kakusu_selected)
     &&  variable_global_exists("ap_kakusu_id_by_index")

@@ -102,7 +102,6 @@ switch(g.dialogue_source.object_index)
             {
                 apclient_location_checks("[" + string(_sk1_real) + "]");
                 show_debug_message("AP: Checked skill location " + _sk1_desc + " (" + string(_sk1_real) + ")");
-                ds_list_add(global.ap_checked_ids, _sk1_real);
             }
         }
         else
@@ -130,7 +129,6 @@ switch(g.dialogue_source.object_index)
             {
                 apclient_location_checks("[" + string(_sk2_real) + "]");
                 show_debug_message("AP: Checked skill location " + _sk2_desc + " (" + string(_sk2_real) + ")");
-                ds_list_add(global.ap_checked_ids, _sk2_real);
             }
         }
         else
@@ -224,7 +222,6 @@ switch(g.dialogue_source.object_index)
         {
             show_debug_message("AP_SPELL1A: non-spell item, sending check for ap_id=" + string(_ap_spell_loc_id));
             apclient_location_checks("[" + string(_ap_spell_loc_id) + "]");
-            ds_list_add(global.ap_checked_ids, _ap_spell_loc_id);
         }
         break;//case NPC_7
     }
@@ -244,7 +241,6 @@ switch(g.dialogue_source.object_index)
                 // First check: send to srv, suppress local
                 show_debug_message("AP_SPELL1A: sending check, server will grant item");
                 apclient_location_checks("[" + string(_ap_spell_loc_id) + "]");
-                ds_list_add(global.ap_checked_ids, _ap_spell_loc_id);
                 _ap_grant_local = false;
                 // Persist checked ID to file immediately
                 var _spsp_dir = environment_get_variable("LOCALAPPDATA");

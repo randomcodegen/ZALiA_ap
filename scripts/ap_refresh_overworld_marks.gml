@@ -65,6 +65,45 @@
             dm_rando_locations[?_owrc_ + STR_Item + STR_Count] = 0;
     }
 
+    // Include the AP-only boss checks when rebuilding acquired totals.
+    var _boss_on = false;
+    if (variable_global_exists("ap_slot_data") && !is_undefined(global.ap_slot_data))
+    {
+        var _boss_opt = ds_map_find_value(global.ap_slot_data, "boss_item_locations");
+        _boss_on = !is_undefined(_boss_opt) && real(_boss_opt);
+    }
+    if (_boss_on)
+    {
+        var _boss_dungeon, _boss_id, _boss_home;
+        for (_boss_dungeon = 1; _boss_dungeon <= 6; _boss_dungeon++)
+        {
+            _boss_id = undefined;
+            if (variable_global_exists("ap_boss_item_location_ids")
+            && !is_undefined(global.ap_boss_item_location_ids))
+                _boss_id = ds_map_find_value(global.ap_boss_item_location_ids,
+                    string(_boss_dungeon));
+            if (is_undefined(_boss_id)) _boss_id = 387642575169 + 192 + _boss_dungeon;
+            if (variable_global_exists("ap_created_manifest_ready")
+            && global.ap_created_manifest_ready
+            && is_undefined(ds_map_find_value(global.ap_created_location_ids, real(_boss_id))))
+                continue;
+            switch (_boss_dungeon)
+            {
+                case 1: _boss_home = Area_PalcA+'00'; break;
+                case 2: _boss_home = Area_PalcB+'00'; break;
+                case 3: _boss_home = Area_PalcC+'00'; break;
+                case 4: _boss_home = Area_PalcD+'00'; break;
+                case 5: _boss_home = Area_PalcE+'00'; break;
+                case 6: _boss_home = Area_PalcF+'00'; break;
+            }
+            _owrc = val(f.dm_rando[?_boss_home+STR_OWRC], g.dm_rm[?_boss_home+STR_OWRC]);
+            if (is_undefined(_owrc)) continue;
+            _owrc_ = hex_str(_owrc);
+            _acq = sign(ds_list_find_index(global.ap_checked_ids, real(_boss_id)) != -1);
+            _owrc_acquired[?_owrc_] = val(_owrc_acquired[?_owrc_]) + _acq;
+        }
+    }
+
     // Write back per-OWRC acquired counts
     var _ok = ds_map_find_first(_owrc_acquired);
     while (!is_undefined(_ok))

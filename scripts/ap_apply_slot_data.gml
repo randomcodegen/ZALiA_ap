@@ -32,6 +32,62 @@
     // Load location_name_to_id from file
     ap_load_loc_map_from_file();
 
+    // AP server holds info on which locations exist in this seed. 
+    // Each hex character represents four consecutive location_num values,
+    // bit 0 is the first location in that group.
+    ds_map_clear(global.ap_created_location_ids);
+    ds_map_clear(global.ap_created_location_indices);
+    global.ap_created_manifest_ready = false;
+    global.ap_location_manifest_version = 0;
+    var _manifest_ver = ds_map_find_value(_dm, "location_manifest_version");
+    var _manifest_bits = ds_map_find_value(_dm, "created_location_bits");
+    var _catalog_size = ds_map_find_value(_dm, "location_catalog_size");
+    if (!is_undefined(_manifest_ver) && !is_undefined(_manifest_bits)
+    &&  !is_undefined(_catalog_size) && real(_manifest_ver) >= 1)
+    {
+        global.ap_location_manifest_version = real(_manifest_ver);
+        var _manifest_len = string_length(string(_manifest_bits));
+        var _manifest_i;
+        for (_manifest_i = 0; _manifest_i < real(_catalog_size); _manifest_i++)
+        {
+            var _char_pos = floor(_manifest_i / 4) + 1;
+            if (_char_pos > _manifest_len) break;
+            var _nibble = ap_hex_val(string_char_at(string(_manifest_bits), _char_pos));
+            var _bit_value = power(2, _manifest_i mod 4);
+            if ((floor(_nibble / _bit_value) mod 2) == 1)
+            {
+                var _location_num = _manifest_i + 1;
+                var _location_id = 387642575169 + _manifest_i;
+                global.ap_created_location_indices[?_location_num] = _location_id;
+                global.ap_created_location_ids[?_location_id] = _location_num;
+            }
+        }
+        global.ap_created_manifest_ready = true;
+        show_debug_message("AP: authoritative location manifest loaded ("
+            + string(ds_map_size(global.ap_created_location_ids)) + " created of "
+            + string(_catalog_size) + ")");
+    }
+    else
+    {
+        show_debug_message("AP: no authoritative location manifest; using legacy location-map compatibility");
+    }
+
+    // Boss checks are virtual locations and are not part of the native GML
+    // location table.  Carry their authoritative AP ids in slot data so the
+    // game never depends on a generator-local zalia_loc_id_map.json file.
+    if (variable_global_exists("ap_boss_item_location_ids")
+    && !is_undefined(global.ap_boss_item_location_ids)
+    && ds_exists(global.ap_boss_item_location_ids, ds_type_map))
+        ds_map_destroy(global.ap_boss_item_location_ids);
+    global.ap_boss_item_location_ids = undefined;
+    var _boss_ids_json = ds_map_find_value(_dm, "boss_item_location_ids");
+    if (!is_undefined(_boss_ids_json))
+    {
+        var _boss_ids_map = json_decode(_boss_ids_json);
+        if (_boss_ids_map != -1) global.ap_boss_item_location_ids = _boss_ids_map;
+        else show_debug_message("AP: failed to parse boss_item_location_ids");
+    }
+
     // Stash the apworld's location data checksum
     var _checksum_val = ds_map_find_value(_dm, "location_data_checksum");
     global.ap_slotdata_location_checksum = "";

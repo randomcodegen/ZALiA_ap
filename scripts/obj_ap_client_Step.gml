@@ -142,6 +142,106 @@
         ap_process_pending();
     }
 
+    // Recover virtual boss checks for crystals placed before this client build,
+    // or while disconnected.
+    if (global.AP_connected
+    &&  variable_global_exists("ap_save_loaded") && global.ap_save_loaded
+    && (!variable_global_exists("ap_boss_item_backfill_done")
+        || !global.ap_boss_item_backfill_done))
+    {
+        global.ap_boss_item_backfill_done = true;
+        var _bf_on = false;
+        if (variable_global_exists("ap_slot_data") && !is_undefined(global.ap_slot_data))
+        {
+            var _bf_opt = ds_map_find_value(global.ap_slot_data, "boss_item_locations");
+            _bf_on = !is_undefined(_bf_opt) && real(_bf_opt);
+        }
+        if (_bf_on)
+        {
+            var _bf_ids = "[";
+            var _bf_count = 0;
+            var _bf_dungeon, _bf_id;
+            for (_bf_dungeon = 1; _bf_dungeon <= 6; _bf_dungeon++)
+            {
+                if (!crystal_is_placed(_bf_dungeon)) continue;
+                _bf_id = undefined;
+                if (variable_global_exists("ap_boss_item_location_ids")
+                && !is_undefined(global.ap_boss_item_location_ids))
+                    _bf_id = ds_map_find_value(global.ap_boss_item_location_ids,
+                        string(_bf_dungeon));
+                if (is_undefined(_bf_id)) _bf_id = 387642575169 + 192 + _bf_dungeon;
+                if (variable_global_exists("ap_created_manifest_ready")
+                && global.ap_created_manifest_ready
+                && is_undefined(ds_map_find_value(global.ap_created_location_ids, real(_bf_id))))
+                    continue;
+                if (_bf_count > 0) _bf_ids += ",";
+                _bf_ids += string(real(_bf_id));
+                _bf_count++;
+            }
+            _bf_ids += "]";
+            if (_bf_count > 0)
+            {
+                apclient_location_checks(_bf_ids);
+                show_debug_message("AP: Backfilled " + string(_bf_count)
+                    + " placed-crystal boss checks");
+            }
+        }
+    }
+
+    // Some server/client combinations do not emit ap_location_checked for the
+    // sending client's own check, so the callback alone is insufficient.
+    if (global.AP_connected && variable_global_exists("ap_checked_ids"))
+    {
+        global.ap_checked_reconcile_timer -= 1;
+        if (global.ap_checked_reconcile_timer <= 0)
+        {
+            global.ap_checked_reconcile_timer = 30;
+            var _rc_raw = apclient_get_checked_locations();
+            var _rc_key = "global.ap_checked_locations[";
+            var _rc_klen = string_length(_rc_key);
+            var _rc_seen = ds_map_create();
+            var _rc_cap = 256;
+            if (variable_global_exists("ap_created_manifest_ready")
+            &&  global.ap_created_manifest_ready)
+                _rc_cap = ds_map_size(global.ap_created_location_ids) + 16;
+            repeat(_rc_cap)
+            {
+                var _rc_p = string_pos(_rc_key, _rc_raw);
+                if (_rc_p == 0) break;
+                _rc_raw = string_delete(_rc_raw, 1, _rc_p + _rc_klen - 1);
+                var _rc_eq = string_pos("]=", _rc_raw);
+                if (_rc_eq == 0) break;
+                _rc_raw = string_delete(_rc_raw, 1, _rc_eq + 1);
+                var _rc_semi = string_pos(";", _rc_raw);
+                if (_rc_semi == 0) break;
+                var _rc_id = real(string_copy(_rc_raw, 1, _rc_semi - 1));
+                _rc_raw = string_delete(_rc_raw, 1, _rc_semi);
+                if (_rc_id > 0) _rc_seen[?_rc_id] = 1;
+            }
+
+            var _rc_added = 0;
+            var _rc_id_key = ds_map_find_first(_rc_seen);
+            while (!is_undefined(_rc_id_key))
+            {
+                var _rc_real_id = real(_rc_id_key);
+                if (ds_list_find_index(global.ap_checked_ids, _rc_real_id) == -1)
+                {
+                    ds_list_add(global.ap_checked_ids, _rc_real_id);
+                    _rc_added++;
+                }
+                _rc_id_key = ds_map_find_next(_rc_seen, _rc_id_key);
+            }
+            if (_rc_added > 0)
+            {
+                ap_refresh_overworld_marks();
+                show_debug_message("AP: Reconciled " + string(_rc_added)
+                    + " new server-confirmed checks (total "
+                    + string(ds_list_size(global.ap_checked_ids)) + ")");
+            }
+            ds_map_destroy(_rc_seen);
+        }
+    }
+
     // Flush P-Bag XP that was banked while the
     if (variable_global_exists("ap_deferred_xp") && global.ap_deferred_xp > 0
         && variable_global_exists("pc") && global.pc != noone && global.pc.x != 0

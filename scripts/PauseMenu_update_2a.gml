@@ -66,6 +66,34 @@ if (Input.Pause_pressed)
 
 var _can_update_state_change = false;
 
+// While the hint recorder is open, vertical menu input scrolls its wrapped
+// lines instead of changing the selected spell. Surface_Step uses the same
+// button test when deciding whether to draw the recorder.
+var _hint_requested = keyboard_check(vk_f3) || Input.GP_Other1_held;
+var _hint_available = (global.RandoHints_enabled
+                    && val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
+                    || !is_undefined(g.dm_RandoHintsRecorder[?STR_Boulder+STR_Circle+STR_Order+STR_Count]);
+var _hint_active = _hint_requested && _hint_available;
+if (_hint_active)
+{
+    if (!hintScrollActive) hintScroll = 0;
+    hintScrollActive = true;
+
+    var _hint_input = gui_tmr_cursor_v();
+    if (_hint_input)
+    {
+        // Match the spell selector's direction test. Input.Down_held is true
+        // for down; any other vertical repeat here is up.
+        var _hint_move = sign_(Input.Down_held);
+        hintScroll = clamp(hintScroll + _hint_move, 0, hintScrollMax);
+        aud_play_sound(get_audio_theme_track(dk_CursorSpellMenu));
+    }
+}
+else
+{
+    hintScrollActive = false;
+}
+
 
 
 
@@ -74,7 +102,8 @@ switch(state&$3) // 1: ST_SPL, 2: ST_ITM, 3: ST_MAP
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     case state_SPELL: { // 1: state_SPELL
-    if (f.spells 
+    if (!_hint_active
+    &&  f.spells
     &&  gui_tmr_cursor_v() ) // 9DF6
     {
         // A1F6
@@ -93,7 +122,7 @@ switch(state&$3) // 1: ST_SPL, 2: ST_ITM, 3: ST_MAP
     }
     else
     {
-        _can_update_state_change = true;
+        _can_update_state_change = !_hint_active;
     }
     
     
@@ -113,7 +142,7 @@ switch(state&$3) // 1: ST_SPL, 2: ST_ITM, 3: ST_MAP
     // ------------------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------
     case state_ITEM:{ // 2: state_ITEM
-    _can_update_state_change = true;
+    _can_update_state_change = !_hint_active;
     if (g.mod_SPELL_CANCEL) g.spell_ready = 0;
     break;}
     
@@ -128,7 +157,7 @@ switch(state&$3) // 1: ST_SPL, 2: ST_ITM, 3: ST_MAP
     case state_MAP:{ // 3: state_MAP
     if (g.mod_SPELL_CANCEL) g.spell_ready = 0;
     
-    if (g.dungeon_num)
+    if (!_hint_active && g.dungeon_num)
     {
         var _CAN_MOVE_X = dungeon_clms_visited >= MapDungeon_CLMS;
         var _CAN_MOVE_Y = dungeon_rows_visited >= MapDungeon_ROWS;
@@ -193,7 +222,7 @@ switch(state&$3) // 1: ST_SPL, 2: ST_ITM, 3: ST_MAP
     }
     
     
-    _can_update_state_change = true;
+    _can_update_state_change = !_hint_active;
     break;}//case ST_MAP
 }//switch(state&3)
 

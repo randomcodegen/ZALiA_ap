@@ -18,11 +18,7 @@
             apclient_location_checks("[" + string(ap_loc_id) + "]");
             show_debug_message("AP: Cross-world item checked, ap_loc_id=" + string(ap_loc_id));
 
-            // Track for reconnect re-send (dedup)
-            if (!variable_global_exists("ap_checked_ids"))
-                global.ap_checked_ids = ds_list_create();
-            if (ds_list_find_index(global.ap_checked_ids, ap_loc_id) == -1)
-                ds_list_add(global.ap_checked_ids, ap_loc_id);
+            // Server polling owns ap_checked_ids.
         }
 
         instance_destroy(id);

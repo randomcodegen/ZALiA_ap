@@ -3,7 +3,7 @@
 
 var _i,_j, _val, _num,_num_, _count;
 var _text, _type;
-var _item, _item_found;
+var _item, _item_found, _location_found, _hint_location;
 var _pi, _color;
 
 
@@ -55,6 +55,22 @@ for (_i = 0; _i < _FOUND_COUNT; _i++)
     _item = g.dm_RandoHintsRecorder[?STR_Hint+_num_+STR_Item];
     if (is_undefined(_item)) continue;
     _item_found = val(g.dm_RandoHintsRecorder[?STR_Hint+_num_+STR_Item+STR_Found]);
+    _location_found = _item_found;
+
+    // In AP play, checked-location state is more precise than whether this
+    // client happens to own the hinted item (especially for cross-world items).
+    if (variable_global_exists("ap_checked_ids")
+    && !is_undefined(global.ap_checked_ids)
+    &&  ds_exists(global.ap_checked_ids, ds_type_list))
+    {
+        _hint_location = val(f.dm_rando[?STR_Rando+STR_Hint+_num_+STR_Location], 0);
+        if (_hint_location > 0
+        &&  ds_list_find_index(global.ap_checked_ids, _hint_location) != -1)
+        {
+            _location_found = true;
+        }
+    }
+    if (_location_found) continue;
 
     // The recorder stores the full flattened hint
     _dlg = g.dm_RandoHintsRecorder[?STR_Hint+_num_+STR_Dialogue];
@@ -64,8 +80,8 @@ for (_i = 0; _i < _FOUND_COUNT; _i++)
              + val(g.dm_RandoHintsRecorder[?STR_Hint+_num_+STR_Text+"02"], "");
 
     _itm = string_letters(_item);
-    if (_item_found) { _bc = p.C_GRY3; _ic = p.C_GRY2; }
-    else             { _bc = p.C_WHT1; _ic = p.C_GRN2; }
+    _bc = p.C_WHT1;
+    _ic = p.C_GRN2;
 
     // Word-wrap _dlg to <= _CPL chars/line
     _cur  = "";
@@ -104,6 +120,22 @@ var _H  = $8<<1; // borders
     _H += _count*g.RandoHintsRecorder_Font_CHAR_SIZE;
     _H +=(_count-1)*2; // leading
     _H  = ((_H div 8)<<3) + (sign(_H mod 8)<<3); // round up to 8
+
+// Keep the recorder inside the viewport. Only the visible wrapped lines are
+// drawn; PauseMenu_update_2a changes hintScroll with the normal up/down input.
+var _H_MAX = ((viewYB()-_YT0) div 8)<<3;
+_H = min(_H, _H_MAX);
+
+var _VISIBLE_LINES = ((_H - (_YT2-_YT0) - $8 - 2 - g.RandoHintsRecorder_Font_CHAR_SIZE) div _DIST1) + 1;
+_VISIBLE_LINES = max(_VISIBLE_LINES, 1);
+var _CONTENT_LINES = _LN + _SHOW_BLD;
+var _SCROLL = 0;
+if (instance_exists(g.PAUSE_MENU))
+{
+    g.PAUSE_MENU.hintScrollMax = max(_CONTENT_LINES-_VISIBLE_LINES, 0);
+    g.PAUSE_MENU.hintScroll = clamp(g.PAUSE_MENU.hintScroll, 0, g.PAUSE_MENU.hintScrollMax);
+    _SCROLL = g.PAUSE_MENU.hintScroll;
+}
 //
 var _ROWS = _H>>3;
 
@@ -145,7 +177,9 @@ if(!_LN && !_SHOW_BLD)
 {
     _xl  = _XL1;
     _yt  = _YT2;
-    draw_text_(_xl,_yt, "NO HINTS FOUND YET!", g.RandoHintsRecorder_Font_SPRITE, global.PI_GUI1);
+    if (_FOUND_COUNT) _text = "NO UNFOUND HINTS!";
+    else              _text = "NO HINTS FOUND YET!";
+    draw_text_(_xl,_yt, _text, g.RandoHintsRecorder_Font_SPRITE, global.PI_GUI1);
     exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
@@ -153,8 +187,10 @@ if(!_LN && !_SHOW_BLD)
 _xl  = _XL1;
 _yt  = _YT2;
 
-// Boulder push order: "BOULDERS: N NE ? W
-if (_SHOW_BLD)
+// Boulder push order: "BOULDERS: N NE ? W". It occupies the first
+// scrollable line, ahead of the recorded hints.
+var _DRAWN_LINES = 0;
+if (_SHOW_BLD && _SCROLL==0 && _DRAWN_LINES<_VISIBLE_LINES)
 {
     _xl = _XL1;
     draw_text_(_xl,_yt, "BOULDERS:", g.RandoHintsRecorder_Font_SPRITE, -1, p.C_WHT1);
@@ -169,11 +205,13 @@ if (_SHOW_BLD)
         _xl += string_length(_val)*g.RandoHintsRecorder_Font_CHAR_SIZE;
     }
     _yt += _DIST1;
+    _DRAWN_LINES++;
 }
 
 // Draw the pre-wrapped hint lines (Pass 1
 var _line, _itmtok, _p, _pre, _post;
-for(_i=0; _i<_LN; _i++)
+var _FIRST_HINT_LINE = max(_SCROLL-_SHOW_BLD, 0);
+for(_i=_FIRST_HINT_LINE; _i<_LN && _DRAWN_LINES<_VISIBLE_LINES; _i++)
 {
     _xl     = _XL1;
     _line   = _LT[_i];
@@ -202,6 +240,7 @@ for(_i=0; _i<_LN; _i++)
     }
 
     _yt += _DIST1;
+    _DRAWN_LINES++;
 }
 
 

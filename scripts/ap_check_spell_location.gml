@@ -32,6 +32,5 @@
 
     show_debug_message("AP_SPELL: sending check, skipping local grant");
     apclient_location_checks("[" + string(_ap_id) + "]");
-    ds_list_add(global.ap_checked_ids, _ap_id);
     return false; // skip local grant, srv sends item
 }

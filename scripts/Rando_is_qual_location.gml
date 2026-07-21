@@ -714,18 +714,20 @@ switch(_LOCATION_ID) // location id = rm name + rm item num
     if (Rando_can_reach_Z1Area() 
     &&  Rando_is_attainable(STR_HAMMER) )
     {
-        // *** It's possible that only 6 pieces of the code are attainable if both SUMMON and FAIRY are NOT in Bulblin
-        var _Bulblin_SPELL = val(dm_save_data[?STR_Bulblin+STR_Spell]);
+        // Seven of the eight Quest-1 wise men must be reachable. Fairy's wise
+        // man reappears after re-entering his room, so he supplies code like
+        // the others. Count the wise-man checks themselves so this also stays
+        // correct when spells are randomized into the general item pool.
         var _code_count  = 0;
-            _code_count += Rando_is_attainable(STR_PROTECT) && _Bulblin_SPELL!=STR_PROTECT;
-            _code_count += Rando_is_attainable(STR_JUMP)    && _Bulblin_SPELL!=STR_JUMP;
-            _code_count += Rando_is_attainable(STR_HEAL)    && _Bulblin_SPELL!=STR_HEAL;
-            _code_count += Rando_is_attainable(STR_FIRE)    && _Bulblin_SPELL!=STR_FIRE;
-            _code_count += Rando_is_attainable(STR_REFLECT) && _Bulblin_SPELL!=STR_REFLECT;
-            _code_count += Rando_is_attainable(STR_ENIGMA)  && _Bulblin_SPELL!=STR_ENIGMA;
-            _code_count += Rando_is_attainable(STR_THUNDER) && _Bulblin_SPELL!=STR_THUNDER;
-        if (_code_count >= 6) // 6 pieces of code: there are 2 possible combos of the missing code
-        //if (_code_count >= 5) // 5 pieces of code: there are 6 possible combos of the missing code
+            _code_count += Rando_is_qual_location(Area_TownA+'60'+STR_Spell); // Rauru
+            _code_count += Rando_is_qual_location(Area_TownA+'61'+STR_Spell); // Ruto
+            _code_count += Rando_is_qual_location(Area_TownA+'62'+STR_Spell); // Saria
+            _code_count += Rando_is_qual_location(Area_TownA+'63'+STR_Spell); // Mido / Fairy
+            _code_count += Rando_is_qual_location(Area_TownA+'65'+STR_Spell); // Nabooru
+            _code_count += Rando_is_qual_location(Area_TownA+'66'+STR_Spell); // Darunia
+            _code_count += Rando_is_qual_location(Area_TownA+'69'+STR_Spell); // New Kasuto
+            _code_count += Rando_is_qual_location(Area_TownA+'6B'+STR_Spell); // Old Kasuto
+        if (_code_count >= 7)
         {
             return true;
         }

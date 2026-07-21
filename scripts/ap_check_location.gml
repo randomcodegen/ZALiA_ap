@@ -82,6 +82,14 @@
     }
 
     show_debug_message("AP_CHECK: spawn=" + string(_spawn_datakey) + " item=" + string(_item_id) + " x=" + string(_x) + " y=" + string(_y) + " used=" + _lookup_used + " -> ap_id=" + string(_ap_id));
+    if (!is_undefined(_ap_id)
+    &&  variable_global_exists("ap_created_manifest_ready")
+    &&  global.ap_created_manifest_ready
+    &&  is_undefined(ds_map_find_value(global.ap_created_location_ids, real(_ap_id))))
+    {
+        show_debug_message("AP_CHECK: rejected non-created location id " + string(_ap_id));
+        _ap_id = undefined;
+    }
     if (is_undefined(_ap_id))
     {
         if (!variable_global_exists("_ap_check_diag_done"))
@@ -107,25 +115,7 @@
         apclient_location_checks("[" + string(_ap_id) + "]");
         show_debug_message("AP: Checked " + string(_desc) + " (" + string(_ap_id) + ")");
         
-        // Track checked locations for re-send on reconnect
-        if (!variable_global_exists("ap_checked_ids"))
-        {
-            global.ap_checked_ids = ds_list_create();
-        }
-        // Avoid duplicates
-        var _dup = false;
-        var _k;
-        for (_k = 0; _k < ds_list_size(global.ap_checked_ids); _k++)
-        {
-            if (global.ap_checked_ids[|_k] == _ap_id)
-            {
-                _dup = true;
-                break;
-            }
-        }
-        if (!_dup)
-        {
-            ds_list_add(global.ap_checked_ids, _ap_id);
-        }
+        // ap_checked_ids is server-confirmed state only. The next server poll
+        // updates it; local pickup state must not masquerade as confirmation.
     }
 }

@@ -46,6 +46,12 @@ SCB_L = Input.B; // xbox cont: X
 state_dir = 0; // 0, 1, -1. Which dir pressed this frame
 DUR_ARROW_BLINK = 6;
 
+// The hint recorder is drawn over the spell/item pages while its button is held.
+// Keep its scroll state on the pause-menu instance so input and drawing can share it.
+hintScroll       = 0;
+hintScrollMax    = 0;
+hintScrollActive = false;
+
 
 
 // Store the current rm palette when the menu opens.

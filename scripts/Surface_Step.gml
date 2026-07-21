@@ -129,9 +129,9 @@ if (can_update_frame_)
 
 can_draw_keys  = false;
 can_draw_hints = false;
-if (g.room_type=="A" 
-&&  g.gui_state==g.gui_state_PAUSE 
-&&  g.PAUSE_MENU.state&$3!=g.PAUSE_MENU.state_MAP )
+var _MENU_PAUSE = g.gui_state==g.gui_state_PAUSE;
+var _OVERWORLD_PAUSE = g.room_type=="C" && g.overworld_paused;
+if (_MENU_PAUSE || _OVERWORLD_PAUSE)
 {
     var _KEYS_REQUESTED = keyboard_check(vk_f4) || Input.GP_Other2_held; // GP_Face4_held, GP_Other2_held (xbox Y)
     var _HINT_REQUESTED = keyboard_check(vk_f3) || Input.GP_Other1_held; // GP_Face2_held, GP_Other1_held (xbox B)
@@ -140,6 +140,7 @@ if (g.room_type=="A"
     
     if (_KEYS_REQUESTED 
     && !_HINT_REQUESTED 
+    && (!_MENU_PAUSE || (g.PAUSE_MENU.state&$3)!=g.PAUSE_MENU.state_MAP)
     &&  val(global.dm_save_file_settings[?STR_Randomize+STR_Key+STR_Locations]) )
     {
         can_draw_keys  = true;
@@ -155,6 +156,35 @@ if (g.room_type=="A"
     {
         can_draw_hints = true;
     }
+
+    // The overworld pause is not the regular pause menu: g_Step exits while
+    // g.overworld_paused is true, so PauseMenu_update_2a never runs. Handle
+    // the hint recorder's scroll input here for that separate pause state.
+    if (_OVERWORLD_PAUSE)
+    {
+        if (can_draw_hints)
+        {
+            if (!g.PAUSE_MENU.hintScrollActive) g.PAUSE_MENU.hintScroll = 0;
+            g.PAUSE_MENU.hintScrollActive = true;
+
+            var _OW_HINT_INPUT = gui_tmr_cursor_v();
+            if (_OW_HINT_INPUT)
+            {
+                var _OW_HINT_MOVE = sign_(Input.Down_held);
+                g.PAUSE_MENU.hintScroll = clamp(g.PAUSE_MENU.hintScroll + _OW_HINT_MOVE, 0, g.PAUSE_MENU.hintScrollMax);
+                aud_play_sound(get_audio_theme_track(dk_CursorSpellMenu));
+            }
+        }
+        else
+        {
+            g.PAUSE_MENU.hintScrollActive = false;
+        }
+    }
+}
+
+if (g.room_type=="C" && !_OVERWORLD_PAUSE)
+{
+    g.PAUSE_MENU.hintScrollActive = false;
 }
 
 

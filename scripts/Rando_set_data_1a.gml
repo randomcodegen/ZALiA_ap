@@ -77,10 +77,20 @@ if (is_undefined(_SPAWN_DATAKEY) || _SPAWN_DATAKEY == "" || _SPAWN_DATAKEY == "u
 }
 var _ap_id = 0;
 
+// New AP slots provide the exact set of locations created for this seed.
+// Do not manufacture mappings for catalog entries that are absent.
+if (variable_global_exists("ap_created_manifest_ready")
+&&  global.ap_created_manifest_ready)
+{
+    var _manifest_ap_id = ds_map_find_value(global.ap_created_location_indices, _LOC_NUM);
+    if (is_undefined(_manifest_ap_id)) _ap_id = -1;
+    else _ap_id = real(_manifest_ap_id);
+}
+
 // Diagnostic: show what we're looking up
 show_debug_message("RSD1A loc=$" + hex_str(_LOC_NUM) + " desc=" + string(_desc) + " item=" + string(_ITEM_ID) + " spawn_dk=" + string(_SPAWN_DATAKEY));
 
-if (variable_global_exists("ap_location_name_to_id") && !is_undefined(global.ap_location_name_to_id) && !is_undefined(_desc) && _desc != "")
+if (_ap_id == 0 && variable_global_exists("ap_location_name_to_id") && !is_undefined(global.ap_location_name_to_id) && !is_undefined(_desc) && _desc != "")
 {
     var _ap_id_raw = ds_map_find_value(global.ap_location_name_to_id, _desc);
     if (!is_undefined(_ap_id_raw))
@@ -106,7 +116,7 @@ if (is_undefined(_ap_id))
     _ap_id = 387642575169 + (_LOC_NUM - 1);
 }
 
-if (!is_undefined(_desc) && is_string(_desc) && _desc != "" && !is_undefined(_SPAWN_DATAKEY))
+if (_ap_id > 0 && !is_undefined(_desc) && is_string(_desc) && _desc != "" && !is_undefined(_SPAWN_DATAKEY))
 {
     if (!variable_global_exists("AP_location_map"))
         global.AP_location_map = ds_map_create();
@@ -150,7 +160,7 @@ else
     }
 }
 
-if (!is_undefined(_desc) && is_string(_desc) && _desc != "" && !is_undefined(_ITEM_ID))
+if (_ap_id > 0 && !is_undefined(_desc) && is_string(_desc) && _desc != "" && !is_undefined(_ITEM_ID))
 {
     if (!variable_global_exists("AP_location_map"))
         global.AP_location_map = ds_map_create();

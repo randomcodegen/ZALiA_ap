@@ -24,6 +24,11 @@
 
     for (_loc_num = 1; _loc_num <= _count; _loc_num++)
     {
+        if (variable_global_exists("ap_created_manifest_ready")
+        &&  global.ap_created_manifest_ready
+        &&  is_undefined(ds_map_find_value(global.ap_created_location_indices, _loc_num)))
+            continue;
+
         _desc = dm_LOCATIONS[?hex_str(_loc_num) + STR_Description];
         if (is_undefined(_desc) || _desc == "")
             continue;
@@ -42,11 +47,19 @@
 
         // Get AP ID from description
         _ap_id = 0;
-        _raw = ds_map_find_value(global.ap_location_name_to_id, _desc);
-        if (!is_undefined(_raw))
-            _ap_id = real(_raw);
-        if (_ap_id == 0)
-            _ap_id = 387642575169 + (_loc_num - 1);
+        if (variable_global_exists("ap_created_manifest_ready")
+        &&  global.ap_created_manifest_ready)
+        {
+            _raw = ds_map_find_value(global.ap_created_location_indices, _loc_num);
+            if (!is_undefined(_raw)) _ap_id = real(_raw);
+        }
+        else
+        {
+            _raw = ds_map_find_value(global.ap_location_name_to_id, _desc);
+            if (!is_undefined(_raw)) _ap_id = real(_raw);
+            if (_ap_id == 0) _ap_id = 387642575169 + (_loc_num - 1);
+        }
+        if (_ap_id <= 0) continue;
 
         // Add spawn datakey entry
         if (!is_undefined(_SPAWN_DATAKEY) && _SPAWN_DATAKEY != "" && _SPAWN_DATAKEY != "undefined")

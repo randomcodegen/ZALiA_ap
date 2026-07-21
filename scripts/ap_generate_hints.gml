@@ -110,7 +110,12 @@
     {
         _loc = real(_dl_pool[|_i]);
         _loc_num = _loc - 387642575169 + 1;
-        if (_loc_num < 1 || _loc_num > global.ap_max_loc_num) continue;
+        if (variable_global_exists("ap_created_manifest_ready")
+        &&  global.ap_created_manifest_ready)
+        {
+            if (is_undefined(ds_map_find_value(global.ap_created_location_ids, _loc))) continue;
+        }
+        else if (_loc_num < 1 || _loc_num > global.ap_max_loc_num) continue;
 
         _hint_idx = _dl_givers[| _i]; // random giver index from the shuffled subset
         _hint_dk = g.dm_RandoHints[? hex_str(_hint_idx) + STR_Dialogue + STR_Datakey];

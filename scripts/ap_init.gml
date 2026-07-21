@@ -25,6 +25,10 @@
     global.ap_location_name_to_id = undefined;
     // Individual Kakusu checks are matched by their index
     global.ap_kakusu_id_by_index = undefined;
+    global.ap_created_location_ids = ds_map_create();
+    global.ap_created_location_indices = ds_map_create();
+    global.ap_created_manifest_ready = false;
+    global.ap_location_manifest_version = 0;
     // Which Kakusu indices were randomly chosen this seed
     global.ap_kakusu_selected = undefined;
     // Reverse map (AP location id -> location name)
@@ -45,6 +49,7 @@
 
     // Track checked locations for re-send on reconnect
     global.ap_checked_ids = ds_list_create();
+    global.ap_checked_reconcile_timer = 0;
 
     // Local player slot (set on slot connect)
     global.ap_local_player = -1;
