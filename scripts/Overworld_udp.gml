@@ -484,6 +484,55 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                             _count2++;
                                     }
                                 }
+
+                                // Boss-item checks are virtual and therefore
+                                // outside the native f.dm_rando location loop.
+                                // Include checked boss entries attached to this
+                                // same shuffled palace OWRC.
+                                var _live_boss_on = false;
+                                if (variable_global_exists("ap_slot_data")
+                                && !is_undefined(global.ap_slot_data))
+                                {
+                                    var _live_boss_opt = ds_map_find_value(global.ap_slot_data,
+                                        "boss_item_locations");
+                                    _live_boss_on = !is_undefined(_live_boss_opt)
+                                        && real(_live_boss_opt);
+                                }
+                                if (_live_boss_on
+                                && variable_global_exists("ap_boss_item_location_ids")
+                                && !is_undefined(global.ap_boss_item_location_ids))
+                                {
+                                    var _live_boss_dungeon;
+                                    for (_live_boss_dungeon = 1; _live_boss_dungeon <= 6;
+                                        _live_boss_dungeon++)
+                                    {
+                                        var _live_boss_id = ds_map_find_value(
+                                            global.ap_boss_item_location_ids,
+                                            string(_live_boss_dungeon));
+                                        if (is_undefined(_live_boss_id)) continue;
+                                        if (is_undefined(ds_map_find_value(
+                                            global.ap_created_location_ids,
+                                            real(_live_boss_id)))) continue;
+
+                                        var _live_boss_home = "";
+                                        switch (_live_boss_dungeon)
+                                        {
+                                            case 1: _live_boss_home = Area_PalcA+'00'; break;
+                                            case 2: _live_boss_home = Area_PalcB+'00'; break;
+                                            case 3: _live_boss_home = Area_PalcC+'00'; break;
+                                            case 4: _live_boss_home = Area_PalcD+'00'; break;
+                                            case 5: _live_boss_home = Area_PalcE+'00'; break;
+                                            case 6: _live_boss_home = Area_PalcF+'00'; break;
+                                        }
+                                        var _live_boss_owrc = val(
+                                            f.dm_rando[?_live_boss_home+STR_OWRC],
+                                            g.dm_rm[?_live_boss_home+STR_OWRC]);
+                                        if (_live_boss_owrc == _owrc
+                                        && ds_list_find_index(global.ap_checked_ids,
+                                            real(_live_boss_id)) != -1)
+                                            _count2++;
+                                    }
+                                }
                             }
                             else
                             {

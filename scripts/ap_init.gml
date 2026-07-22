@@ -25,6 +25,7 @@
     global.ap_location_name_to_id = undefined;
     // Individual Kakusu checks are matched by their index
     global.ap_kakusu_id_by_index = undefined;
+    global.ap_slot_kakusu_location_ids = undefined;
     global.ap_created_location_ids = ds_map_create();
     global.ap_created_location_indices = ds_map_create();
     global.ap_created_manifest_ready = false;

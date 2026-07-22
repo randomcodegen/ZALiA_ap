@@ -13,6 +13,21 @@
     else
         ds_map_clear(global.ap_kakusu_id_by_index);
 
+    // Current protocol supplies the fixed index mapping directly.
+    if (variable_global_exists("ap_slot_kakusu_location_ids")
+    && !is_undefined(global.ap_slot_kakusu_location_ids)
+    && ds_exists(global.ap_slot_kakusu_location_ids, ds_type_map))
+    {
+        var _slot_kakusu_key = ds_map_find_first(global.ap_slot_kakusu_location_ids);
+        while (!is_undefined(_slot_kakusu_key))
+        {
+            global.ap_kakusu_id_by_index[?string(_slot_kakusu_key)] = real(
+                global.ap_slot_kakusu_location_ids[?_slot_kakusu_key]);
+            _slot_kakusu_key = ds_map_find_next(global.ap_slot_kakusu_location_ids,
+                _slot_kakusu_key);
+        }
+    }
+
     var _max_loc_num = 0;
     var _location_id = ds_map_find_first(global.ap_created_location_ids);
     while (!is_undefined(_location_id))
@@ -25,10 +40,6 @@
             global.ap_id_to_location_name[?real(_location_id)] = _location_name;
         }
         if (_location_num > _max_loc_num) _max_loc_num = _location_num;
-
-        // Kakusu 1..12 occupy catalog location_num 169..180.
-        if (_location_num >= 169 && _location_num <= 180)
-            global.ap_kakusu_id_by_index[?string(_location_num - 168)] = real(_location_id);
 
         _location_id = ds_map_find_next(global.ap_created_location_ids, _location_id);
     }

@@ -40,8 +40,27 @@
     var _manifest_ver = ds_map_find_value(_dm, "location_manifest_version");
     var _manifest_bits = ds_map_find_value(_dm, "created_location_bits");
     var _catalog_size = ds_map_find_value(_dm, "location_catalog_size");
+
+    if (variable_global_exists("ap_slot_kakusu_location_ids")
+    && !is_undefined(global.ap_slot_kakusu_location_ids)
+    && ds_exists(global.ap_slot_kakusu_location_ids, ds_type_map))
+        ds_map_destroy(global.ap_slot_kakusu_location_ids);
+    global.ap_slot_kakusu_location_ids = undefined;
+    var _kakusu_ids_json = ds_map_find_value(_dm, "kakusu_location_ids");
+    if (!is_undefined(_kakusu_ids_json))
+    {
+        var _kakusu_ids_map = json_decode(_kakusu_ids_json);
+        if (_kakusu_ids_map != -1)
+            global.ap_slot_kakusu_location_ids = _kakusu_ids_map;
+    }
+    if (is_undefined(global.ap_slot_kakusu_location_ids))
+    {
+        global.ap_created_manifest_error = true;
+        show_debug_message("AP: slot rejected: kakusu_location_ids is missing");
+    }
+
     if (!is_undefined(_manifest_ver) && !is_undefined(_manifest_bits)
-    &&  !is_undefined(_catalog_size) && real(_manifest_ver) >= 1)
+    &&  !is_undefined(_catalog_size) && real(_manifest_ver) >= 2)
     {
         global.ap_location_manifest_version = real(_manifest_ver);
         var _manifest_len = string_length(string(_manifest_bits));
