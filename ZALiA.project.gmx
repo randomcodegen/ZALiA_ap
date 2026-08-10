@@ -15399,6 +15399,7 @@
     </scripts>
     <scripts name="archipelago">
       <script>scripts\dev_ap_export_data.gml</script>
+      <script>scripts\zelda2_require_rom.gml</script>
       <script>scripts\ap_init.gml</script>
       <script>scripts\ap_room_info.gml</script>
       <script>scripts\ap_slot_connected.gml</script>

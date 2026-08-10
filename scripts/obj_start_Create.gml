@@ -1,5 +1,11 @@
 /// obj_start_Create()
 
+if (!zelda2_require_rom())
+{
+    game_end();
+    exit;
+}
+
 if (DEV)
 {
     repeat(1) show_debug_message("");
