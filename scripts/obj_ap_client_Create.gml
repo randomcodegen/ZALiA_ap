@@ -7,6 +7,7 @@
     global.ap_slot = "Player1";
     global.ap_password = "";
     global.AP_connect_attempted = false;
+    global.AP_slot_connect_attempted = false;
     global.AP_last_error = "";
     global.AP_error_time = 0;
     // Spell-sequence puzzle spells sent by the

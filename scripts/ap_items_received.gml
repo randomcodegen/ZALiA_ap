@@ -22,7 +22,9 @@
             if (_item_id < 0) continue;
             // Store "index:name" so ap_process_pending can skip
             var _item_index = _index + _i;
-            ds_list_add(global.ap_pending_items, string(_item_index) + ":" + global.arg_names[_i]);
+            var _pending_item = string(_item_index) + ":" + global.arg_names[_i];
+            if (ds_list_find_index(global.ap_pending_items, _pending_item) != -1) continue;
+            ds_list_add(global.ap_pending_items, _pending_item);
             show_debug_message("AP: Queuing [" + string(_item_index) + "] " + global.arg_names[_i] + " for post-load delivery");
         }
         // Track the highest index covered

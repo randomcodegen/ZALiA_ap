@@ -266,8 +266,9 @@
     }
 
     // Auto-login to slot once room info is
-    if (apclient_get_state() == global.AP_STATE_ROOM_INFO && !global.AP_connected)
+    if (apclient_get_state() == global.AP_STATE_ROOM_INFO && !global.AP_slot_connect_attempted)
     {
+        global.AP_slot_connect_attempted = true;
         apclient_connect_slot(global.ap_slot, global.ap_password, "[]");
     }
 
