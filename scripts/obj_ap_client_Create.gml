@@ -54,7 +54,12 @@
     ap_init();
 
     // Init the DLL (defined in extension)
+    global.ap_trace_start = current_time;
+    global.ap_trace_last = global.ap_trace_start;
+    global.ap_trace_last_poll = global.ap_trace_start;
+    ap_connection_trace("DLL init begin");
     apclient_init(1);
+    ap_connection_trace("DLL init end");
 
     show_debug_message("AP Client initialised");
 }

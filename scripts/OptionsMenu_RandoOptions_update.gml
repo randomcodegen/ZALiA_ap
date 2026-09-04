@@ -78,6 +78,19 @@ switch(Rando_cursor)
     break;}
     
     // -------------------------------------------------
+    case Rando_AP_MAP_ICONS:{
+    if (timer) break;
+
+    if (_InputConfirm_pressed2)
+    {
+        global.AP_map_icons = !global.AP_map_icons;
+        save_game_pref();
+        aud_play_sound(_SOUND2);
+        timer = DURATION1;
+    }
+    break;}
+
+    // -------------------------------------------------
     case Rando_HINTS:{
     if (timer) break;
     

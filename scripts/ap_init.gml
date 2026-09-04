@@ -53,6 +53,15 @@
     global.ap_checked_ids = ds_list_create();
     global.ap_checked_reconcile_timer = 0;
 
+    global.ap_map_logic = -1;
+    global.ap_map_logic_dirty = true;
+    global.ap_map_logic_ready = false;
+    global.ap_in_logic_ids = ds_map_create();
+    global.ap_logic_received = ds_map_create();
+    global.ap_logic_item_counts = ds_map_create();
+    global.ap_logic_inventory_ready = false;
+    global.ap_logic_received_max = -1;
+
     // Local player slot (set on slot connect)
     global.ap_local_player = -1;
 

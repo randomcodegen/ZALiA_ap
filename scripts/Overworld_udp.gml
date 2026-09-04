@@ -7,6 +7,7 @@ var _clm,_row;
 var _spr, _pi;
 var _item_id, _datakey1, _owrc_;
 var _C1 = g.room_type=="C" && !exit_owrc;
+if (_C1 && global.AP_connected) ap_map_logic_refresh();
 
 
 if (false)
@@ -470,6 +471,7 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                 dm_rando_locations[?_datakey1+dk_can_draw] = false;
                             }
                             _count1 = val(dm_rando_locations[?_owrc_+STR_Item+STR_Count]);
+                            var _logic_count = 0;
                             // AP mode: compute live acquired count from
                             if (global.AP_connected && variable_global_exists("ap_checked_ids"))
                             {
@@ -480,8 +482,10 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                     {
                                         var _ap_jj_dk = STR_Location+hex_str(_jj);
                                         var _ap_id5 = val(dm_rando_locations[?_ap_jj_dk+"_AP_ID"], 387642575169 + (_jj - 1));
-                                        if (ds_list_find_index(global.ap_checked_ids, _ap_id5) != -1)
-                                            _count2++;
+                                        var _checked5 = ds_list_find_index(global.ap_checked_ids, _ap_id5) != -1;
+                                        if (_checked5) _count2++;
+                                        if (_checked5 || val(global.ap_in_logic_ids[?_ap_id5]))
+                                            _logic_count++;
                                     }
                                 }
 
@@ -527,10 +531,14 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                         var _live_boss_owrc = val(
                                             f.dm_rando[?_live_boss_home+STR_OWRC],
                                             g.dm_rm[?_live_boss_home+STR_OWRC]);
-                                        if (_live_boss_owrc == _owrc
-                                        && ds_list_find_index(global.ap_checked_ids,
-                                            real(_live_boss_id)) != -1)
-                                            _count2++;
+                                        if (_live_boss_owrc == _owrc)
+                                        {
+                                            var _boss_checked = ds_list_find_index(global.ap_checked_ids,
+                                                real(_live_boss_id)) != -1;
+                                            if (_boss_checked) _count2++;
+                                            if (_boss_checked || val(global.ap_in_logic_ids[?real(_live_boss_id)]))
+                                                _logic_count++;
+                                        }
                                     }
                                 }
                             }
@@ -545,7 +553,7 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                  _has_continent_map = (f.items&ITM_MAP2)!=0;
                             else _has_continent_map = (f.items&ITM_MAP1)!=0;
 
-                            // With the map, reveal the actual item sprite
+                            // With the map, reveal item art or AP classification
                             var _spi = 0;
                             // Sub-image for the icon. spr_AP_Logo (cross-world
                             var _sub = 0;
@@ -556,11 +564,11 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                 _spr = -1;
                                 if (global.AP_connected)
                                 {
-                                    // Cross-world item from another AP game: show
+                                    // Use classification for all items when requested, or remote items.
                                     var _owner = undefined;
                                     if (variable_global_exists("ap_scouted_players"))
                                         _owner = global.ap_scouted_players[?_ap_scout_id];
-                                    if (!is_undefined(_owner) && _owner != global.ap_local_player)
+                                    if (global.AP_map_icons || (!is_undefined(_owner) && _owner != global.ap_local_player))
                                     {
                                         _spr = spr_AP_Logo;
                                         // Frame by AP classification (prog wins over
@@ -638,6 +646,12 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                             ||  (_count1>1 && _count2) )
                             {
                                 _text = string(_count2)+"/"+string(_count1);
+                                if (global.AP_connected)
+                                {
+                                    var _logic_text = "?";
+                                    if (global.ap_map_logic_ready) _logic_text = string(_logic_count);
+                                    _text = string(_count2)+"/"+_logic_text+"("+string(_count1)+")";
+                                }
                                 _x -= (string_length(_text)*ItemAcquiredIndicator_FONT_W)>>1;
                                 _y += 5;
                                 dm_rando_locations[?_datakey1+STR_Text]       = _text;

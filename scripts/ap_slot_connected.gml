@@ -1,10 +1,23 @@
 /// ap_slot_connected(slot_data)
 {
-    show_debug_message("AP: Slot connected: " + string(argument0));
+    show_debug_message("AP: Slot connected, slot data chars=" + string(string_length(argument0)));
     global.AP_connected = true;
     global.ap_boss_item_backfill_done = false;
     global.ap_ever_connected = true;
+    if (global.ap_map_logic != -1) ds_map_destroy(global.ap_map_logic);
+    global.ap_map_logic = -1;
+    global.ap_map_logic_dirty = true;
+    global.ap_map_logic_ready = false;
+    ds_map_clear(global.ap_in_logic_ids);
+    ds_map_clear(global.ap_logic_received);
+    ds_map_clear(global.ap_logic_item_counts);
+    // The DLL omits empty ReceivedItems callbacks. Start with empty inventory;
+    // replayed batches populate it and still detect any missing indices.
+    global.ap_logic_inventory_ready = true;
+    global.ap_logic_received_max = -1;
+    ap_connection_trace("apply slot data begin");
     ap_apply_slot_data(argument0);
+    ap_connection_trace("apply slot data end");
     if (global.ap_created_manifest_error || !global.ap_created_manifest_ready)
     {
         global.AP_connected = false;
@@ -22,7 +35,9 @@
         ds_list_clear(global.ap_checked_ids);
 
     // apclient_get_checked_locations() returns a GML struct string
+    ap_connection_trace("read checked locations begin");
     var _server_checked = apclient_get_checked_locations();
+    ap_connection_trace("read checked locations end chars=" + string(string_length(_server_checked)));
     var _chk_key = "global.ap_checked_locations[";
     var _chk_klen = string_length(_chk_key);
     var _chk_raw = _server_checked;
@@ -54,7 +69,9 @@
     show_debug_message("AP: Loaded " + string(ds_list_size(global.ap_checked_ids)) + " checked locations (" + string(_chk_added) + " new from server)");
 
     // Refresh overworld checkmark data with srv-accurate
+    ap_connection_trace("refresh map marks begin");
     ap_refresh_overworld_marks();
+    ap_connection_trace("refresh map marks end");
 
     // Scout all ZALiA locations to cache
     ds_map_clear(global.ap_scouted_flags);
@@ -76,7 +93,9 @@
         _created_id = ds_map_find_next(global.ap_created_location_ids, _created_id);
     }
     _scout_ids += "]";
+    ap_connection_trace("scout request begin locations=" + string(_loc_count));
     apclient_location_scouts(_scout_ids, 0);
+    ap_connection_trace("scout request returned");
     show_debug_message("AP: Scouting " + string(_loc_count) + " locations");
 
     // Store local player number for cross-world

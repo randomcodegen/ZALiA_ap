@@ -4,6 +4,27 @@
     var _len = argument1;
     var _i;
 
+    // AP inventory for logic: replayed items count once, independent of save delivery.
+    if (_index == 0)
+    {
+        ds_map_clear(global.ap_logic_received);
+        ds_map_clear(global.ap_logic_item_counts);
+        global.ap_logic_received_max = -1;
+    }
+    for (_i = 0; _i < _len; _i++)
+    {
+        var _logic_index = _index + _i;
+        if (is_undefined(global.ap_logic_received[?_logic_index]))
+        {
+            var _logic_name = global.arg_names[_i];
+            global.ap_logic_received[?_logic_index] = _logic_name;
+            global.ap_logic_item_counts[?_logic_name] = val(global.ap_logic_item_counts[?_logic_name]) + 1;
+        }
+    }
+    global.ap_logic_received_max = max(global.ap_logic_received_max, _index + _len - 1);
+    global.ap_logic_inventory_ready = ds_map_size(global.ap_logic_received) == global.ap_logic_received_max + 1;
+    global.ap_map_logic_dirty = true;
+
     show_debug_message("AP: Items received, index=" + string(_index) + " len=" + string(_len));
 
     if (!variable_global_exists("ap_items_received_index"))

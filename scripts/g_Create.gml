@@ -446,6 +446,7 @@ DisplayOWPosOnMap_VER = 0; // 0: ow map will show pcrc as last uncovered(outside
 // For rando, will draw a check on ow tile if item there has been acquired.
 global.MarkItemLocations_VER = 2;
 global.MarkItemLocations_state = 0;
+global.AP_map_icons = false;
 switch(global.MarkItemLocations_VER){
 default:{global.MarkItemLocations_state_COUNT=2; break;}
 case  2:{global.MarkItemLocations_state_COUNT=3; break;}

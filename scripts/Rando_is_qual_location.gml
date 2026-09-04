@@ -1322,6 +1322,32 @@ switch(_LOCATION_ID) // location id = rm name + rm item num
         }
     }
     break;}
+
+    // --------------------------------------------
+    case Area_PalcA+'09'+'01':{ // PBag: P1 crumbling bridge
+    if (Rando_is_qual_location(val(dm_save_data[?STR_Dungeon+STR_Rando+STR_Parapa_Palace+"A"], STR_Parapa_Palace)))
+    {
+        // The bridge breaks under Link, so the item must be collectable by stabbing.
+        if (string_pos(STR_KEY, _ITEM_ID)
+        ||  string_pos(STR_PBAG,_ITEM_ID) )
+        {
+            if (ItemLocations_DARKROOM_DIFFICULTY>=1
+            ||  Rando_is_attainable(STR_CANDLE,STR_FIRE) )
+            {
+                if(!KeyLocations_WILL_RANDOMIZE)
+                {
+                    return true;
+                }
+
+                if (Rando_is_attainable(STR_ALLKEY)
+                ||  Rando_attainable_key_count(val(g.dm_dungeon[?STR_Dungeon+STR_Num+STR_Parapa_Palace],1))>=1 )
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    break;}
     
     
     
@@ -1434,6 +1460,38 @@ switch(_LOCATION_ID) // location id = rm name + rm item num
     if (Rando_is_qual_location(val(dm_save_data[?STR_Dungeon+STR_Rando+STR_Midoro_Palace+"A"], STR_Midoro_Palace)))
     {
         if (Rando_is_attainable(STR_GLOVE))
+        {
+            return true;
+        }
+    }
+    break;}
+
+    // ------------------------------------------------------------
+    case Area_PalcB+'07'+'01':{ // PBag: P2 falling-block room
+    if (Rando_is_qual_location(val(dm_save_data[?STR_Dungeon+STR_Rando+STR_Midoro_Palace+"A"], STR_Midoro_Palace))
+    &&  Rando_is_attainable(STR_GLOVE)
+    &&  (string_pos(STR_KEY, _ITEM_ID)
+    ||   string_pos(STR_PBAG, _ITEM_ID)))
+    {
+        if(!KeyLocations_WILL_RANDOMIZE
+        ||  Rando_is_attainable(STR_ALLKEY)
+        ||  Rando_attainable_key_count(val(g.dm_dungeon[?STR_Dungeon+STR_Num+STR_Midoro_Palace],2))>=2 )
+        {
+            return true;
+        }
+    }
+    break;}
+
+    // ------------------------------------------------------------
+    case Area_PalcB+'12'+'01':{ // PBag: P2 Iron Knuckle room
+    if (Rando_is_qual_location(val(dm_save_data[?STR_Dungeon+STR_Rando+STR_Midoro_Palace+"A"], STR_Midoro_Palace))
+    &&  Rando_is_attainable(STR_GLOVE)
+    &&  (string_pos(STR_KEY, _ITEM_ID)
+    ||   string_pos(STR_PBAG, _ITEM_ID)))
+    {
+        if(!KeyLocations_WILL_RANDOMIZE
+        ||  Rando_is_attainable(STR_ALLKEY)
+        ||  Rando_attainable_key_count(val(g.dm_dungeon[?STR_Dungeon+STR_Num+STR_Midoro_Palace],2))>=1 )
         {
             return true;
         }
@@ -2017,6 +2075,17 @@ switch(_LOCATION_ID) // location id = rm name + rm item num
         {
             return true;
         }
+    }
+    break;}
+
+    // ------------------------------------------------------------
+    case Area_PalcE+'03'+'01':{ // PBag: P5 Ra room
+    if (Rando_is_qual_location(val(dm_save_data[?STR_Dungeon+STR_Rando+STR_Palace_On_The_Sea+"A"], STR_Palace_On_The_Sea))
+    &&  Rando_is_attainable(STR_FAIRY)
+    &&  (string_pos(STR_KEY, _ITEM_ID)
+    ||   string_pos(STR_PBAG, _ITEM_ID)))
+    {
+        return true;
     }
     break;}
     
@@ -2642,6 +2711,18 @@ switch(_LOCATION_ID) // location id = rm name + rm item num
     
     // ------------------------ PALACE 7 ------------------------------
     // ------------------------------------------------------------
+    // ------------------------------------------------------------
+    case Area_PalcG+'49'+'01':{ // PBag: GP elevator junction
+    if (Rando_can_get_inside_P7()
+    &&  Rando_is_attainable(STR_GLOVE)
+    &&  (string_pos(STR_KEY, _ITEM_ID)
+    ||   string_pos(STR_PBAG, _ITEM_ID)))
+    {
+        return true;
+    }
+    break;}
+
+
     // ------------------------------------------------------------
     case Area_PalcG+'04'+'01':{ // PBag: Dead end 1
     if (Rando_can_get_inside_P7())

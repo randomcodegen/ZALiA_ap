@@ -1,9 +1,21 @@
 /// obj_ap_client_Step()
 {
+    var _poll_start = current_time;
+    var _poll_gap = _poll_start - global.ap_trace_last_poll;
+    global.ap_trace_last_poll = _poll_start;
+    if (!global.ap_ever_connected && _poll_gap > 250)
+        ap_connection_trace("game poll gap=" + string(_poll_gap) + "ms");
     var _script = apclient_poll();
+    var _poll_ms = current_time - _poll_start;
+    if (_poll_ms > 16) ap_connection_trace("slow DLL poll=" + string(_poll_ms) + "ms");
     if (_script != "{}" && _script != "")
     {
+        var _batch_start = current_time;
+        var _callback_ms = 0;
+        var _event_count = 0;
         var _remaining = _script;
+        ap_connection_trace("batch received chars=" + string(string_length(_script))
+            + " DLL_poll=" + string(_poll_ms) + "ms");
         var _semi_pos, _block, _eq, _j_val;
         _j_val = "";
 
@@ -37,21 +49,8 @@
             if (_eq > 0)
             {
                 var _raw = string_copy(_block, _eq + 4, string_length(_block) - _eq - 4);
-                var _pos = 1;
-                _j_val = "";
-                while (_pos <= string_length(_raw))
-                {
-                    if (_pos + 6 <= string_length(_raw) && string_char_at(_raw, _pos) == "'" && string_char_at(_raw, _pos + 1) == "+")
-                    {
-                        _j_val += "'";
-                        _pos += 7;
-                    }
-                    else
-                    {
-                        _j_val += string_char_at(_raw, _pos);
-                        _pos += 1;
-                    }
-                }
+                // Decode the DLL's apostrophe escape in one native pass.
+                _j_val = string_replace_all(_raw, "'+"+chr(34)+"'"+chr(34)+"+'", "'");
                 continue;
             }
 
@@ -100,6 +99,9 @@
                 while (string_length(_func) > 0 && string_char_at(_func, string_length(_func)) == "#")
                     _func = string_delete(_func, string_length(_func), 1);
 
+                var _callback_start = current_time;
+                _event_count++;
+                ap_connection_trace(_func + " begin args_chars=" + string(string_length(_a)));
                 if (_func == "ap_room_info") ap_room_info(_a);
                 else if (_func == "ap_slot_connected") ap_slot_connected(_a);
                 else if (_func == "ap_slot_refused") ap_slot_refused();
@@ -115,8 +117,14 @@
                 else if (_func == "ap_location_checked") ap_location_checked(real(_a));
                 else if (_func == "ap_print_json") ap_print_json(_a);
                 else if (_func == "ap_bounced") ap_bounced(_a);
+                var _elapsed = current_time - _callback_start;
+                _callback_ms += _elapsed;
+                ap_connection_trace(_func + " end handler=" + string(_elapsed) + "ms");
             }
         }
+        ap_connection_trace("batch done events=" + string(_event_count)
+            + " parser=" + string(current_time - _batch_start - _callback_ms)
+            + "ms handlers=" + string(_callback_ms) + "ms");
     }
 
     // Tick per-message display timers; remove expired
@@ -259,7 +267,9 @@
         var _pw = "(none)";
         if (string_length(global.ap_password) > 0) _pw = "***";
         show_debug_message("AP connect — server: " + global.ap_server + ", slot: " + global.ap_slot + ", password: " + _pw);
+        ap_connection_trace("connect request begin");
         apclient_connect("", "ZALiA", global.ap_server);
+        ap_connection_trace("connect request returned");
         apclient_set_items_handling(7);
         apclient_set_version(0, 6, 8);
         global.AP_connect_attempted = true;
@@ -269,7 +279,9 @@
     if (apclient_get_state() == global.AP_STATE_ROOM_INFO && !global.AP_slot_connect_attempted)
     {
         global.AP_slot_connect_attempted = true;
+        ap_connection_trace("slot login request begin");
         apclient_connect_slot(global.ap_slot, global.ap_password, "[]");
+        ap_connection_trace("slot login request returned");
     }
 
     // Exit on initial conn failure, but not

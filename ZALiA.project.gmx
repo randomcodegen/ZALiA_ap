@@ -15407,6 +15407,7 @@
       <script>scripts\ap_socket_connected.gml</script>
       <script>scripts\ap_socket_disconnected.gml</script>
       <script>scripts\ap_socket_error.gml</script>
+      <script>scripts\ap_connection_trace.gml</script>
       <script>scripts\ap_items_received.gml</script>
       <script>scripts\ap_item_Step.gml</script>
       <script>scripts\ap_item_draw.gml</script>
@@ -15425,6 +15426,8 @@
       <script>scripts\ap_build_complete_map.gml</script>
       <script>scripts\ap_build_settings_string.gml</script>
       <script>scripts\ap_refresh_overworld_marks.gml</script>
+      <script>scripts\ap_map_logic_refresh.gml</script>
+      <script>scripts\ap_map_logic_validate.gml</script>
       <script>scripts\ap_hex_val.gml</script>
       <script>scripts\ap_grant_doll.gml</script>
       <script>scripts\ap_grant_key_next.gml</script>

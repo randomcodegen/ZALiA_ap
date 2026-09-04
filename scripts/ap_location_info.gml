@@ -44,9 +44,11 @@
     {
         show_debug_message("AP: Scouts cached (" + string(ds_map_size(global.ap_scouted_flags)) + "), generating dynamic hints...");
         // NPC item-location hints. May early-exit if none
+        ap_connection_trace("generate hints begin");
         ap_generate_hints();
         // Zelda hint is generated independently
         ap_generate_zelda_hint();
+        ap_connection_trace("generate hints end");
         global.ap_hints_generated = true;
     }
 

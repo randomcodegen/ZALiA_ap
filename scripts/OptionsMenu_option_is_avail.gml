@@ -68,6 +68,7 @@ switch(argument0)
     {
         default:                    {return false; break;}
         case Rando_MARK_ACQUIRED:   {return val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]) || val(global.dm_save_file_settings[?STR_Randomize+STR_PBAG+STR_Locations]) || val(global.dm_save_file_settings[?STR_Randomize+STR_Key +STR_Locations]); break;}
+        case Rando_AP_MAP_ICONS:    {return global.AP_connected; break;}
         case Rando_HINTS:           {return val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]); break;}
         case Rando_MAPS_SHOW_KEYS:  {return val(global.dm_save_file_settings[?STR_Randomize+STR_Key+STR_Locations]); break;}
         case Rando_ENEMY_RANDO:     {return val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy+STR_Method]) || val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy+STR_Spawner]) || val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy+STR_ENIGMA]); break;}

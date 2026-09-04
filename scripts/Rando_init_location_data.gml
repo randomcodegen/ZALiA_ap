@@ -1924,6 +1924,18 @@ _loc_num = Rando_add_location(Area_PalcF+'1E',$01, LocCatID_Kaku01,0, 'Kakusu 10
 _loc_num = Rando_add_location(Area_EastA+'36',$01, LocCatID_Kaku01,0, 'Kakusu 11', '',$01);
 _loc_num = Rando_add_location(Area_EastA+'37',$01, LocCatID_Kaku01,0, 'Kakusu 12', '',$01);
 
+// Appended to preserve every existing exported location id.
+_loc_num = Rando_add_location(Area_PalcA+'09',$01, LocCatID_Dngn01,1, 'PBag: P1 crumbling bridge', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
+_loc_num = Rando_add_location(Area_PalcB+'07',$01, LocCatID_Dngn01,1, 'PBag: P2 falling-block room', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING3;
+_loc_num = Rando_add_location(Area_PalcB+'12',$01, LocCatID_Dngn01,1, 'PBag: P2 Iron Knuckle room', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING2;
+_loc_num = Rando_add_location(Area_PalcE+'03',$01, LocCatID_Dngn01,1, 'PBag: P5 Ra room', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING3;
+_loc_num = Rando_add_location(Area_PalcG+'49',$01, LocCatID_Dngn01,2, 'PBag: GP elevator junction', STR_PBAG,$01);
+dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING5;
+
 
 Location_COUNT      = val(dm_LOCATIONS[?STR_Total+STR_Location+STR_Count]);
 dm_save_data[?                          STR_Total+STR_Location+STR_Count] = Location_COUNT;

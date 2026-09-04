@@ -2,7 +2,9 @@
 {
     var _slot_data = argument0;
     global.ap_created_manifest_error = false;
+    ap_connection_trace("slot JSON decode begin chars=" + string(string_length(_slot_data)));
     var _dm = json_decode(_slot_data);
+    ap_connection_trace("slot JSON decode end");
     if (_dm == -1)
     {
         show_debug_message("AP: Failed to parse slot_data (outer JSON too large for GMS 1.4 json_decode)");

@@ -59,6 +59,11 @@ for(_i=0; _i<_COUNT0; _i++)
         _text = val(dm_options[?_dk+hex_str(_option_state)+STR_Text], STR_undefined);
         break;}
         
+        case Rando_AP_MAP_ICONS:{
+        _option_state = global.AP_map_icons;
+        _text = val(dm_options[?_dk+hex_str(_option_state)+STR_Text], STR_undefined);
+        break;}
+
         case Rando_HINTS:{
         _option_state = global.RandoHints_enabled;
         _text = val(dm_options[?_dk+hex_str(_option_state)+STR_Text], STR_undefined);

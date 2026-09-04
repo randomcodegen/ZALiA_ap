@@ -655,6 +655,15 @@ switch(global.MarkItemLocations_VER)
 }//switch(global.MarkItemLocations_VER)
 //                                                                          //
 _j=0; _k=0;
+Rando_AP_MAP_ICONS = ++_i;
+_dk2 = _dk0+hex_str(_i);
+dm_options[?_dk2+STR_Font] = FONT2;
+dm_options[?_dk2+STR_Option+STR_Text] = "AP MAP ICONS";
+dm_options[?_dk2+STR_State+hex_str(_j++)+STR_Text] = "OFF";
+dm_options[?_dk2+STR_State+hex_str(_j++)+STR_Text] = "ON";
+dm_options[?_dk2+STR_Description+hex_str(_k++)] = "WITH A TREASURE MAP, SHOW AP PROGRESSION, USEFUL OR FILLER ICONS INSTEAD OF ITEM SPRITES.";
+//                                                                          //
+_j=0; _k=0;
 Rando_HINTS = ++_i;
 _dk2 = _dk0+hex_str(_i);
 dm_options[?_dk2+STR_Font]                         = FONT2;

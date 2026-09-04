@@ -33,6 +33,7 @@ _dm_save_data[?STR_Overworld+STR_Mark+STR_Hidden+STR_Exit] = g.HiddenExitIndicat
 _dm_save_data[?STR_Halloween+"01"]                      = global.Halloween1_enabled;
 
 _dm_save_data[?STR_Overworld+STR_Mark+STR_Acquired]     = global.MarkItemLocations_state;
+_dm_save_data[?"AP_MapIcons"] = global.AP_map_icons;
 _dm_save_data[?STR_Rando+STR_Palette]                   = g.RandoPalette_state;
 _dm_save_data[?STR_Rando+STR_Enemy]                     = global.EnemyRando_enabled;
 _dm_save_data[?STR_Rando+STR_Overworld+STR_TSRC]        = global.can_rando_ow_tsrc;
