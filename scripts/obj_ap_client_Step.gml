@@ -138,6 +138,7 @@
             && global.ap_message_timers[|0] <= 0)
         {
             ds_list_delete(global.ap_message_buffer, 0);
+            ds_list_delete(global.ap_message_colors, 0);
             ds_list_delete(global.ap_message_timers, 0);
         }
     }

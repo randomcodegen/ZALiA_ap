@@ -20,6 +20,7 @@ if (_MAX_CHARS < 1) _MAX_CHARS = 1;
 
 // Build a flat list of visual lines
 var _dl_texts  = ds_list_create();
+var _dl_colors = ds_list_create();
 var _dl_timers = ds_list_create();
 
 var _i;
@@ -30,6 +31,7 @@ for (_i = 0; _i < _count; _i++)
     var _timer = global.ap_message_timers[|_i];
 
     var _rem = _msg;
+    var _colors = global.ap_message_colors[|_i];
     while (string_length(_rem) > _MAX_CHARS)
     {
         // Search backward from _MAX_CHARS for a space
@@ -49,13 +51,16 @@ for (_i = 0; _i < _count; _i++)
         }
 
         ds_list_add(_dl_texts,  _line);
+        ds_list_add(_dl_colors, string_copy(_colors, 1, string_length(_line) * 8));
         ds_list_add(_dl_timers, _timer);
         _rem = string_delete(_rem, 1, _ns - 1);
+        _colors = string_delete(_colors, 1, (_ns - 1) * 8);
     }
     // Remainder (or full message if it fits)
     if (string_length(_rem) > 0)
     {
         ds_list_add(_dl_texts,  _rem);
+        ds_list_add(_dl_colors, _colors);
         ds_list_add(_dl_timers, _timer);
     }
 }
@@ -85,9 +90,20 @@ for (_i = 0; _i < _line_count; _i++)
         _alpha * 0.65);
 
     // Text fades by darkening toward black
-    var _lum = floor(255 * _alpha);
-    draw_text_(_XL, _y, _text, _FONT_SPR, -1, make_colour_rgb(_lum, _lum, _lum));
+    var _colors = _dl_colors[|_i];
+    var _start = 1;
+    while (_start <= string_length(_text))
+    {
+        var _code = string_copy(_colors, (_start - 1) * 8 + 1, 8);
+        var _end = _start + 1;
+        while (_end <= string_length(_text) && string_copy(_colors, (_end - 1) * 8 + 1, 8) == _code)
+            _end++;
+        draw_text_(_XL + (_start - 1) * _CHAR_W, _y, string_copy(_text, _start, _end - _start),
+            _FONT_SPR, -1, merge_colour(c_black, real(_code), _alpha));
+        _start = _end;
+    }
 }
 
 ds_list_destroy(_dl_texts);
+ds_list_destroy(_dl_colors);
 ds_list_destroy(_dl_timers);

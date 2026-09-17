@@ -15414,6 +15414,7 @@
       <script>scripts\ap_location_info.gml</script>
       <script>scripts\ap_location_checked.gml</script>
       <script>scripts\ap_print_json.gml</script>
+      <script>scripts\ap_message_color.gml</script>
       <script>scripts\ap_draw_messages.gml</script>
       <script>scripts\ap_bounced.gml</script>
       <script>scripts\ap_send_deathlink.gml</script>

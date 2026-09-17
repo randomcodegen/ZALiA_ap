@@ -108,6 +108,8 @@ switch(state)
                     vspd     = 0;
                     dk_spawn = other.Item_SPAWN_DATAKEY;
                     ITEM_ID  = other.Item_ITEM_ID;
+                    // Preserve the location for native rewards too, so AP owns the grant.
+                    SPAWN_DATAKEY = dk_spawn;
                     IS_DROP  = true;
 
                     // AP cross-world items: Carock caught one of
@@ -116,7 +118,6 @@ switch(state)
                     ||  object_index == obj_ap_item_prog)
                     {
                         ITEM_TYPE     = STR_PBAG;
-                        SPAWN_DATAKEY = dk_spawn;
                         GO_sprite_init(object_get_sprite(object_index));
                         ap_loc_id = undefined;
                         if (variable_global_exists("AP_location_map") && !is_undefined(dk_spawn))

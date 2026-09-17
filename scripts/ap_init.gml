@@ -44,6 +44,7 @@
 
     // Message buffer for in-game AP message display
     global.ap_message_buffer = ds_list_create();
+    global.ap_message_colors = ds_list_create();
     global.ap_message_timers = ds_list_create(); // per-message countdown (frames)
 
     // Items received high-water mark (prevents double-grant)
