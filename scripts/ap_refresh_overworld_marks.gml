@@ -75,14 +75,14 @@
     if (_boss_on)
     {
         var _boss_dungeon, _boss_id, _boss_home;
-        for (_boss_dungeon = 1; _boss_dungeon <= 6; _boss_dungeon++)
+        for (_boss_dungeon = 1; _boss_dungeon <= 7; _boss_dungeon++)
         {
             _boss_id = undefined;
             if (variable_global_exists("ap_boss_item_location_ids")
             && !is_undefined(global.ap_boss_item_location_ids))
                 _boss_id = ds_map_find_value(global.ap_boss_item_location_ids,
                     string(_boss_dungeon));
-            if (is_undefined(_boss_id)) _boss_id = 387642575169 + 192 + _boss_dungeon;
+            if (is_undefined(_boss_id)) continue;
             if (variable_global_exists("ap_created_manifest_ready")
             && global.ap_created_manifest_ready
             && is_undefined(ds_map_find_value(global.ap_created_location_ids, real(_boss_id))))
@@ -95,6 +95,7 @@
                 case 4: _boss_home = Area_PalcD+'00'; break;
                 case 5: _boss_home = Area_PalcE+'00'; break;
                 case 6: _boss_home = Area_PalcF+'00'; break;
+                case 7: _boss_home = Area_PalcG+'00'; break;
             }
             _owrc = val(f.dm_rando[?_boss_home+STR_OWRC], g.dm_rm[?_boss_home+STR_OWRC]);
             if (is_undefined(_owrc)) continue;

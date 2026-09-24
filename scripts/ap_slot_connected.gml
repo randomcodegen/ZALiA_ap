@@ -27,6 +27,7 @@
         show_message(global.AP_last_error + "#Generate a new multiworld with the current apworld.");
         exit;
     }
+    global.ap_console_failure_shown = false;
 
     // Load srv's confirmed checked locations.
     if (!variable_global_exists("ap_checked_ids"))

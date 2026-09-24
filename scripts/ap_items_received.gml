@@ -70,7 +70,7 @@
             if (_item_index <= global.ap_items_received_index) continue;
 
             show_debug_message("AP: Receiving " + _item_name + " (ID=" + string(_item_id) + ", player=" + string(_player) + ")");
-            ap_grant_item(_item_name);
+            ap_grant_item(_item_name, _item_index);
         }
         global.ap_items_received_index = _index + _len - 1;
     }

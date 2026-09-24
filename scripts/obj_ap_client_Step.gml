@@ -1,5 +1,7 @@
 /// obj_ap_client_Step()
 {
+    ap_console_step();
+
     var _poll_start = current_time;
     var _poll_gap = _poll_start - global.ap_trace_last_poll;
     global.ap_trace_last_poll = _poll_start;
@@ -104,7 +106,7 @@
                 ap_connection_trace(_func + " begin args_chars=" + string(string_length(_a)));
                 if (_func == "ap_room_info") ap_room_info(_a);
                 else if (_func == "ap_slot_connected") ap_slot_connected(_a);
-                else if (_func == "ap_slot_refused") ap_slot_refused();
+                else if (_func == "ap_slot_refused") ap_slot_refused(real(_a));
                 else if (_func == "ap_socket_connected") ap_socket_connected();
                 else if (_func == "ap_socket_disconnected") ap_socket_disconnected();
                 else if (_func == "ap_socket_error") ap_socket_error(_a);
@@ -151,8 +153,7 @@
         ap_process_pending();
     }
 
-    // Recover virtual boss checks for crystals placed before this client build,
-    // or while disconnected.
+    // Recover boss checks earned before this client build or while disconnected.
     if (global.AP_connected
     &&  variable_global_exists("ap_save_loaded") && global.ap_save_loaded
     && (!variable_global_exists("ap_boss_item_backfill_done")
@@ -170,15 +171,20 @@
             var _bf_ids = "[";
             var _bf_count = 0;
             var _bf_dungeon, _bf_id;
-            for (_bf_dungeon = 1; _bf_dungeon <= 6; _bf_dungeon++)
+            for (_bf_dungeon = 1; _bf_dungeon <= 7; _bf_dungeon++)
             {
-                if (!crystal_is_placed(_bf_dungeon)) continue;
+                if (_bf_dungeon <= 6)
+                {
+                    if (!crystal_is_placed(_bf_dungeon)) continue;
+                }
+                else if (!val(f.dm_quests[?get_defeated_dk()+Area_PalcG+'35'+STR_PRXM+'0']))
+                    continue;
                 _bf_id = undefined;
                 if (variable_global_exists("ap_boss_item_location_ids")
                 && !is_undefined(global.ap_boss_item_location_ids))
                     _bf_id = ds_map_find_value(global.ap_boss_item_location_ids,
                         string(_bf_dungeon));
-                if (is_undefined(_bf_id)) _bf_id = 387642575169 + 192 + _bf_dungeon;
+                if (is_undefined(_bf_id)) continue;
                 if (variable_global_exists("ap_created_manifest_ready")
                 && global.ap_created_manifest_ready
                 && is_undefined(ds_map_find_value(global.ap_created_location_ids, real(_bf_id))))
@@ -192,7 +198,7 @@
             {
                 apclient_location_checks(_bf_ids);
                 show_debug_message("AP: Backfilled " + string(_bf_count)
-                    + " placed-crystal boss checks");
+                    + " boss checks");
             }
         }
     }
@@ -251,15 +257,26 @@
         }
     }
 
+    if (global.ap_pbag_popup_timer > 0 && !global.ap_console_open
+    &&  variable_global_exists("pc") && instance_exists(global.pc)
+    &&  g.gui_state == g.gui_state_NONE && !g.cutscene)
+        global.ap_pbag_popup_timer -= 1;
+
     // Flush P-Bag XP that was banked while the
     if (variable_global_exists("ap_deferred_xp") && global.ap_deferred_xp > 0
         && variable_global_exists("pc") && global.pc != noone && global.pc.x != 0
-        && g.gui_state == g.gui_state_NONE && !g.cutscene)
+        && g.gui_state == g.gui_state_NONE && !g.cutscene
+        && !global.ap_console_open)
     {
         var _dxp = global.ap_deferred_xp;
         global.ap_deferred_xp = 0;
         f.xpPending += _dxp;
         f.xpPending &= $FFFF;
+        if (global.ap_pbag_popup_timer > 0)
+            global.ap_pbag_popup_xp += _dxp;
+        else
+            global.ap_pbag_popup_xp = _dxp;
+        global.ap_pbag_popup_timer = g.XP_RISE_DURATION;
         show_debug_message("AP: Delivered " + string(_dxp) + " banked P-Bag XP to f.xpPending (now " + string(f.xpPending) + ")");
     }
 
@@ -274,10 +291,12 @@
         apclient_set_items_handling(7);
         apclient_set_version(0, 6, 8);
         global.AP_connect_attempted = true;
+        global.ap_connect_started = current_time;
     }
 
     // Auto-login to slot once room info is
-    if (apclient_get_state() == global.AP_STATE_ROOM_INFO && !global.AP_slot_connect_attempted)
+    if (apclient_get_state() == global.AP_STATE_ROOM_INFO
+    &&  !global.AP_slot_connect_attempted)
     {
         global.AP_slot_connect_attempted = true;
         ap_connection_trace("slot login request begin");
@@ -285,14 +304,27 @@
         ap_connection_trace("slot login request returned");
     }
 
-    // Exit on initial conn failure, but not
-    if (global.AP_error_time > 0 && !global.ap_ever_connected)
+    // End connection attempt. /connect starts the next one.
+    if (!global.AP_connected && !global.ap_console_failure_shown
+    &&  global.AP_connect_attempted && global.ap_connect_started > 0
+    &&  current_time - global.ap_connect_started >= 15000)
     {
-        global.AP_error_time -= 1;
-        if (global.AP_error_time == 0 && !global.AP_connected)
+        apclient_disconnect();
+        global.ap_connect_started = 0;
+        global.AP_slot_connect_attempted = false;
+        global.ap_console_failure_shown = true;
+        if (!global.ap_console_open)
         {
-            show_message("Archipelago connection failed: " + global.AP_last_error + "#The game will now close.");
-            game_end();
+            keyboard_string = "";
+            ds_list_clear(global.ap_console_matches);
+            global.ap_console_completion_input = "";
+            global.ap_console_match_index = -1;
+            global.ap_console_suggestion = "";
         }
+        global.ap_console_open = true;
+        var _error = "AP ERROR: CONNECTION TIMED OUT. USE /CONNECT TO RETRY.";
+        if (global.AP_last_error != "")
+            _error += " LAST SOCKET ERROR: " + string(global.AP_last_error);
+        ap_console_add(_error, "");
     }
 }

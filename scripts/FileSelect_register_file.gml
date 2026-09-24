@@ -111,9 +111,7 @@ set_saved_value(_FILE_NUM, STR_Save+STR_Town+STR_Num, f.cont_run_town_num);
 
 if (_AP_MODE)
 {
-    var _ap_seed = global.ap_seed;
-    set_saved_value(_FILE_NUM, get_file_seed_dk(_FILE_NUM,1), _ap_seed);
-    set_saved_value(_FILE_NUM, get_file_seed_dk(_FILE_NUM,2), _ap_seed ^ $FFFFFFFF);
+    FileSelect_change_rando_seed(_FILE_NUM, global.ap_seed);
 }
 else
 {
@@ -266,7 +264,7 @@ _file = file_text_open_write(working_directory+_FILE_NAME);
 // Putting this outside of `if (_RANDO_ON)` so stuff like palette rando, dungeon tileset rando will still run
 with(instance_create(0,0,Rando))
 {
-    var _SEED = get_saved_value(_FILE_NUM, STR_File+STR_Seed+STR_Quest+hex_str(_QUEST_NUM), FileSelect_get_file_seed(_FILE_NUM,_QUEST_NUM));
+    var _SEED = get_saved_value(_FILE_NUM, get_file_seed_dk(_FILE_NUM,_QUEST_NUM), FileSelect_get_file_seed(_FILE_NUM,_QUEST_NUM));
     Rando_randomize_file(_FILE_NUM, _QUEST_NUM, _SEED, _dm_save_file_settings_ENCODED);
     instance_destroy();
 }

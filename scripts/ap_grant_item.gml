@@ -1,6 +1,7 @@
-/// ap_grant_item(item_name)
+/// ap_grant_item(item_name, received_index)
 {
     var _name = argument0;
+    var _receivedIndex = argument1;
     var _granted = false;
     var _bit;
     var _gml_name = "";
@@ -104,7 +105,7 @@
 
 
         // P-Bag (filler)
-        case "P-Bag": _granted = ap_grant_pbag(); break;
+        case "P-Bag": _granted = ap_grant_pbag(_receivedIndex); break;
     }
 
     if (_granted)

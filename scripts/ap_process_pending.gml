@@ -41,7 +41,7 @@
             continue;
         }
         show_debug_message("AP_PENDING: granting [" + string(_item_idx) + "] " + _item_name);
-        ap_grant_item(_item_name);
+        ap_grant_item(_item_name, _item_idx);
         _granted_count++;
     }
     show_debug_message("AP_PENDING: granted=" + string(_granted_count) + " skipped=" + string(_skipped_count));

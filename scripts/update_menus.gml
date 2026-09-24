@@ -56,7 +56,8 @@ switch(gui_state)
     //&& !(Input.heldPrev&Input.S) ) // Start btn $10
     {
         // Block pause menu until AP conn is
-        if (global.AP_connect_attempted && !global.AP_connected)
+        if (global.AP_connect_attempted && !global.AP_connected
+        &&  !global.ap_ever_connected && !global.ap_console_failure_shown)
             break;
         // Open Pause Menu
         gui_state = gui_state_PAUSE;

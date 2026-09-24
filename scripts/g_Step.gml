@@ -1,5 +1,8 @@
 /// g_Step()
 
+// Keep AP polling and console responsive while game controls are paused
+if (variable_global_exists("ap_console_open") && global.ap_console_open) exit;
+
 
 // An Extension so that Windows Sleep Margin in 
 // Global Game Settings doesn't need to be maxed at 15 

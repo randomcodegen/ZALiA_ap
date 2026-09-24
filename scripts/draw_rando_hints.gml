@@ -47,8 +47,12 @@ if (_CPL < 8) _CPL = 8;
 
 // Pass 1: word-wrap every found hint into
 var _LN = 0;              // total wrapped display lines across all hints
-var _LT, _LC, _LI, _LIC; // per line: text, base color, item
+var _LT, _LC, _LI, _LIC, _LAC; // per line: text, native colors, AP colors
 var _wi, _wlen, _wch, _word, _cur, _dlg, _itm, _bc, _ic;
+var _apColors, _wordColors, _curColors, _wordStart, _whiteCode;
+var _apLoc, _remoteLoc, _flags, _node, _itemColor, _playerColor, _locColor;
+var _isPos, _inPos, _atPos, _ci, _charColor;
+_whiteCode = string_format(c_white, 8, 0);
 for (_i = 0; _i < _FOUND_COUNT; _i++)
 {
     _num_ = string_copy(_FOUND_NUMS, (_i<<1)+1, 2);
@@ -83,34 +87,89 @@ for (_i = 0; _i < _FOUND_COUNT; _i++)
     _bc = p.C_WHT1;
     _ic = p.C_GRN2;
 
+    _apColors = "";
+    _apLoc = val(f.dm_rando[?STR_Rando+STR_Hint+_num_+STR_Location], 0);
+    _remoteLoc = val(f.dm_rando[?STR_Rando+STR_Hint+_num_+STR_Location+"REMOTE"], 0);
+    if (variable_global_exists("ap_scouted_flags")
+    && (_apLoc >= 387642575169 || _remoteLoc > 0))
+    {
+        _flags = global.ap_scouted_flags[?_apLoc];
+        if (!is_real(_flags)) _flags = 0;
+        _node = ds_map_create();
+        _node[?"type"] = "item_name";
+        _node[?"flags"] = _flags;
+        _itemColor = ap_message_color(_node);
+        _node[?"type"] = "player_name";
+        _playerColor = ap_message_color(_node);
+        _node[?"type"] = "location_name";
+        _locColor = ap_message_color(_node);
+        ds_map_destroy(_node);
+
+        _isPos = string_pos(" IS ", _dlg);
+        _inPos = string_pos(" IS IN ", _dlg);
+        _atPos = string_pos(" AT ", _dlg);
+        if (_isPos > 1 && _atPos > _isPos)
+        {
+            for (_ci = 1; _ci <= string_length(_dlg); _ci++)
+            {
+                _charColor = c_white;
+                if (_ci < _isPos) _charColor = _itemColor;
+                else if (_inPos > 0 && _ci >= _inPos + 7 && _ci < _atPos)
+                    _charColor = _playerColor;
+                else if (_ci >= _atPos + 4) _charColor = _locColor;
+                _apColors += string_format(_charColor, 8, 0);
+            }
+            _itm = "";
+        }
+    }
+
     // Word-wrap _dlg to <= _CPL chars/line
     _cur  = "";
+    _curColors = "";
     _word = "";
     _wlen = string_length(_dlg);
     for (_wi = 1; _wi <= _wlen + 1; _wi++)
     {
         if (_wi <= _wlen) _wch = string_char_at(_dlg, _wi);
         else              _wch = " "; // sentinel flushes the final word
-        if (_wch != " ") { _word += _wch; continue; }
+        if (_wch != " ")
+        {
+            if (_word == "") _wordStart = _wi;
+            _word += _wch;
+            continue;
+        }
         if (_word == "") continue;
+        _wordColors = string_copy(_apColors, (_wordStart - 1) * 8 + 1, string_length(_word) * 8);
 
         while (string_length(_word) > _CPL)
         {
             if (_cur != "")
             {
-                _LT[_LN]=_cur; _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic; _LN++;
+                _LT[_LN]=_cur; _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic; _LAC[_LN]=_curColors; _LN++;
                 _cur = "";
+                _curColors = "";
             }
-            _LT[_LN]=string_copy(_word,1,_CPL); _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic; _LN++;
+            _LT[_LN]=string_copy(_word,1,_CPL); _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic;
+            _LAC[_LN]=string_copy(_wordColors,1,_CPL*8); _LN++;
             _word = string_copy(_word, _CPL+1, string_length(_word)-_CPL);
+            _wordColors = string_delete(_wordColors, 1, _CPL*8);
         }
 
-        if (_cur == "") _cur = _word;
-        else if (string_length(_cur)+1+string_length(_word) <= _CPL) _cur += " " + _word;
-        else { _LT[_LN]=_cur; _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic; _LN++; _cur = _word; }
+        if (_cur == "") { _cur = _word; _curColors = _wordColors; }
+        else if (string_length(_cur)+1+string_length(_word) <= _CPL)
+        {
+            _cur += " " + _word;
+            if (_apColors != "") _curColors += _whiteCode + _wordColors;
+        }
+        else
+        {
+            _LT[_LN]=_cur; _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic; _LAC[_LN]=_curColors; _LN++;
+            _cur = _word;
+            _curColors = _wordColors;
+        }
         _word = "";
     }
-    if (_cur != "") { _LT[_LN]=_cur; _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic; _LN++; }
+    if (_cur != "") { _LT[_LN]=_cur; _LC[_LN]=_bc; _LI[_LN]=_itm; _LIC[_LN]=_ic; _LAC[_LN]=_curColors; _LN++; }
 }
 
 _count = max(_LN + _SHOW_BLD, 1);
@@ -209,7 +268,7 @@ if (_SHOW_BLD && _SCROLL==0 && _DRAWN_LINES<_VISIBLE_LINES)
 }
 
 // Draw the pre-wrapped hint lines (Pass 1
-var _line, _itmtok, _p, _pre, _post;
+var _line, _itmtok, _p, _pre, _post, _lineColors, _start, _end, _code;
 var _FIRST_HINT_LINE = max(_SCROLL-_SHOW_BLD, 0);
 for(_i=_FIRST_HINT_LINE; _i<_LN && _DRAWN_LINES<_VISIBLE_LINES; _i++)
 {
@@ -217,6 +276,27 @@ for(_i=_FIRST_HINT_LINE; _i<_LN && _DRAWN_LINES<_VISIBLE_LINES; _i++)
     _line   = _LT[_i];
     _itmtok = _LI[_i];
     _color  = _LC[_i];
+
+    _lineColors = _LAC[_i];
+    if (_lineColors != "")
+    {
+        _start = 1;
+        while (_start <= string_length(_line))
+        {
+            _code = string_copy(_lineColors, (_start - 1) * 8 + 1, 8);
+            _end = _start + 1;
+            while (_end <= string_length(_line)
+            && string_copy(_lineColors, (_end - 1) * 8 + 1, 8) == _code)
+                _end++;
+            draw_text_(_xl + (_start - 1) * g.RandoHintsRecorder_Font_CHAR_SIZE, _yt,
+                string_copy(_line, _start, _end - _start),
+                g.RandoHintsRecorder_Font_SPRITE, -1, real(_code));
+            _start = _end;
+        }
+        _yt += _DIST1;
+        _DRAWN_LINES++;
+        continue;
+    }
 
     _p = 0;
     if (_itmtok != "") _p = string_pos(_itmtok, _line);

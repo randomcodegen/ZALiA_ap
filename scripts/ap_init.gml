@@ -47,6 +47,22 @@
     global.ap_message_colors = ds_list_create();
     global.ap_message_timers = ds_list_create(); // per-message countdown (frames)
 
+    // F1 Archipelago console
+    global.ap_console_open = false;
+    global.ap_console_suggestion = "";
+    global.ap_console_log = ds_list_create();
+    global.ap_console_colors = ds_list_create();
+    global.ap_console_commands = ds_list_create();
+    global.ap_console_items = ds_list_create();
+    global.ap_console_locations = ds_list_create();
+    global.ap_console_matches = ds_list_create();
+    global.ap_console_completion_input = "";
+    global.ap_console_match_index = -1;
+    ds_list_add(global.ap_console_commands,
+        "!HELP", "!STATUS", "!PLAYERS", "!MISSING", "!CHECKED",
+        "!REMAINING", "!HINT", "!HINT_LOCATION",
+        "/HOST", "/SLOT", "/PASSWORD", "/CONNECT");
+
     // Items received high-water mark (prevents double-grant)
     global.ap_items_received_index = -1;
 
@@ -76,6 +92,8 @@
 
     // DeathLink support
     global.ap_deathlink_enabled = false;
+    global.ap_deathlink_remote_pending = false;
+    global.ap_deathlink_last_time = -1;
 
     // Tracks whether we've ever conn successfully
     global.ap_ever_connected = false;
@@ -94,6 +112,8 @@
 
     // P-Bag XP banked from grants that happened
     global.ap_deferred_xp = 0;
+    global.ap_pbag_popup_xp = 0;
+    global.ap_pbag_popup_timer = 0;
 
     // Count of 1-Up dolls received from the AP
     global.ap_received_dolls = 0;

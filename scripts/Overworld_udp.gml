@@ -507,7 +507,7 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                 && !is_undefined(global.ap_boss_item_location_ids))
                                 {
                                     var _live_boss_dungeon;
-                                    for (_live_boss_dungeon = 1; _live_boss_dungeon <= 6;
+                                    for (_live_boss_dungeon = 1; _live_boss_dungeon <= 7;
                                         _live_boss_dungeon++)
                                     {
                                         var _live_boss_id = ds_map_find_value(
@@ -527,6 +527,7 @@ if (_C1  // _C1:  g.room_type=="C" && !exit_grid_xy
                                             case 4: _live_boss_home = Area_PalcD+'00'; break;
                                             case 5: _live_boss_home = Area_PalcE+'00'; break;
                                             case 6: _live_boss_home = Area_PalcF+'00'; break;
+                                            case 7: _live_boss_home = Area_PalcG+'00'; break;
                                         }
                                         var _live_boss_owrc = val(
                                             f.dm_rando[?_live_boss_home+STR_OWRC],

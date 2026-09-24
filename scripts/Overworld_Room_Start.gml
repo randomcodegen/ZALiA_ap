@@ -420,8 +420,8 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
     }
 
     // Boss-item checks are AP-only virtual locations, so the native location
-    // loop above cannot count them.  Attach one to each crystal palace's
-    // physical overworld tile when the option is enabled.
+    // loop above cannot count them. Attach one to each palace's physical
+    // overworld tile when the option is enabled.
     var _ap_boss_items_on = false;
     if (global.AP_connected && variable_global_exists("ap_slot_data")
     && !is_undefined(global.ap_slot_data))
@@ -432,15 +432,14 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
     if (_ap_boss_items_on)
     {
         var _ap_boss_dungeon, _ap_boss_id, _ap_boss_home, _ap_boss_key;
-        for (_ap_boss_dungeon = 1; _ap_boss_dungeon <= 6; _ap_boss_dungeon++)
+        for (_ap_boss_dungeon = 1; _ap_boss_dungeon <= 7; _ap_boss_dungeon++)
         {
             _ap_boss_id = undefined;
             if (variable_global_exists("ap_boss_item_location_ids")
             && !is_undefined(global.ap_boss_item_location_ids))
                 _ap_boss_id = ds_map_find_value(global.ap_boss_item_location_ids,
                     string(_ap_boss_dungeon));
-            if (is_undefined(_ap_boss_id))
-                _ap_boss_id = 387642575169 + 192 + _ap_boss_dungeon;
+            if (is_undefined(_ap_boss_id)) continue;
             if (_ap_manifest_ready
             && is_undefined(ds_map_find_value(global.ap_created_location_ids, real(_ap_boss_id))))
                 continue;
@@ -453,6 +452,7 @@ if (val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]))
                 case 4: _ap_boss_home = Area_PalcD+'00'; break;
                 case 5: _ap_boss_home = Area_PalcE+'00'; break;
                 case 6: _ap_boss_home = Area_PalcF+'00'; break;
+                case 7: _ap_boss_home = Area_PalcG+'00'; break;
             }
             _owrc = val(f.dm_rando[?_ap_boss_home+STR_OWRC],
                 g.dm_rm[?_ap_boss_home+STR_OWRC]);

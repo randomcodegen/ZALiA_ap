@@ -5,7 +5,10 @@
 if (global.pc.is_dead 
 && !global.pc.stun_timer )
 {
-    ap_send_deathlink();
+    if (global.ap_deathlink_remote_pending)
+        global.ap_deathlink_remote_pending = false;
+    else
+        ap_send_deathlink();
 
     global.BackgroundColor_at_death = background_colour;
     global.pc.is_dead = 0;

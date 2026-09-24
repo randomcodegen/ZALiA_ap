@@ -87,6 +87,23 @@ else if (surface_exists(srf_app_paused_frame))
 if (can_draw_keys) draw_key_stats();
 // Rando Hints
 if (can_draw_hints) draw_rando_hints();
+// AP P-Bag XP display above player.
+if (variable_global_exists("ap_pbag_popup_timer") && global.ap_pbag_popup_timer > 0
+&&  !global.ap_console_open && g.gui_state == g.gui_state_NONE && !g.cutscene
+&&  variable_global_exists("pc") && instance_exists(global.pc))
+{
+    var _rise = (g.XP_RISE_DURATION - global.ap_pbag_popup_timer) div 2;
+    var _digits = string(floor(global.ap_pbag_popup_xp));
+    var _x = global.pc.x - floor(string_length(_digits) * g.RisingXP_SPR_W / 2);
+    var _y = global.pc.yt - 8 - _rise;
+    var _i, _digit;
+    for (_i = 1; _i <= string_length(_digits); _i++)
+    {
+        _digit = real(string_char_at(_digits, _i));
+        draw_sprite_(g.dl_rising_xp_spr[|_digit], 0, _x, _y);
+        _x += g.RisingXP_SPR_W;
+    }
+}
 // AP Message Log
 ap_draw_messages();
 
@@ -256,6 +273,8 @@ if (keyboard_check_pressed(vk_f7))
     ds_list_destroy(_dl_rows); _dl_rows=undefined;
 }
 */
+
+ap_draw_console();
 
 
 

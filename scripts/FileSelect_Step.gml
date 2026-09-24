@@ -1,5 +1,7 @@
 /// FileSelect_Step()
 
+if (variable_global_exists("ap_console_open") && global.ap_console_open) exit;
+
 
 if (room_is_type("B")) FileSelect_udp2();
 

@@ -1,19 +1,30 @@
-/// ap_grant_pbag()
+/// ap_grant_pbag(received_index)
 {
-    // Pick a version the way the in-game P-Bags are received
+    // The AP item index identifies this bag across save files and reconnects.
     var _ver = 1;
     var _def_count = 0;
     if (variable_instance_exists(f, "dm_PBags_DEFAULT") && ds_exists(f.dm_PBags_DEFAULT, ds_type_map))
         _def_count = val(f.dm_PBags_DEFAULT[?STR_Count]);
 
+    var _count = _def_count;
+    if (_count <= 0) _count = 10;
+    var _pick;
+    if (argument0 >= 0)
+    {
+        var _oldSeed = random_get_seed();
+        random_set_seed(global.ap_seed + argument0);
+        _pick = irandom_range(1, _count);
+        random_set_seed(_oldSeed);
+    }
+    else _pick = irandom_range(1, _count);
+
     if (_def_count > 0)
     {
-        var _pick = irandom_range(1, _def_count);
         _ver = val(f.dm_PBags_DEFAULT[?hex_str(_pick) + STR_Version], 1);
     }
     else
     {
-        _ver = irandom_range(1, 10); // defensive fallback: any tier, still varied
+        _ver = _pick; // fallback: pick random tier
     }
 
     // Version -> XP via the exact same path
