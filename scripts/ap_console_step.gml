@@ -3,6 +3,9 @@
     if (keyboard_check_pressed(vk_f1))
     {
         global.ap_console_open = !global.ap_console_open;
+        global.ap_console_scroll = 0;
+        global.ap_console_history_index = -1;
+        global.ap_console_history_draft = "";
         global.ap_console_suggestion = "";
         ds_list_clear(global.ap_console_matches);
         global.ap_console_completion_input = "";
@@ -16,6 +19,9 @@
     if (keyboard_check_pressed(vk_escape))
     {
         global.ap_console_open = false;
+        global.ap_console_scroll = 0;
+        global.ap_console_history_index = -1;
+        global.ap_console_history_draft = "";
         global.ap_console_suggestion = "";
         ds_list_clear(global.ap_console_matches);
         global.ap_console_completion_input = "";
@@ -27,6 +33,52 @@
 
     if (string_length(keyboard_string) > 200)
         keyboard_string = string_copy(keyboard_string, 1, 200);
+
+    var _history_count = ds_list_size(global.ap_console_history);
+    var _history_changed = false;
+    if (keyboard_check_pressed(vk_up) && _history_count > 0)
+    {
+        if (global.ap_console_history_index < 0)
+        {
+            global.ap_console_history_draft = keyboard_string;
+            global.ap_console_history_index = _history_count - 1;
+        }
+        else if (global.ap_console_history_index > 0)
+            global.ap_console_history_index -= 1;
+        keyboard_string = global.ap_console_history[|global.ap_console_history_index];
+        _history_changed = true;
+    }
+    if (keyboard_check_pressed(vk_down) && global.ap_console_history_index >= 0)
+    {
+        if (global.ap_console_history_index < _history_count - 1)
+        {
+            global.ap_console_history_index += 1;
+            keyboard_string = global.ap_console_history[|global.ap_console_history_index];
+        }
+        else
+        {
+            global.ap_console_history_index = -1;
+            keyboard_string = global.ap_console_history_draft;
+        }
+        _history_changed = true;
+    }
+    if (_history_changed)
+    {
+        ds_list_clear(global.ap_console_matches);
+        global.ap_console_completion_input = "";
+        global.ap_console_match_index = -1;
+        global.ap_console_suggestion = "";
+    }
+
+    var _scroll = 0;
+    if (keyboard_check_pressed(vk_pageup) || keyboard_check_pressed(vk_pagedown))
+    {
+        var _lineH = sprite_get_height(global.dl_game_font[|global.game_font_idx]) + 2;
+        var _page = max(1, floor((viewH() - 11 - 5 * _lineH) / _lineH));
+        if (keyboard_check_pressed(vk_pageup)) _scroll = _page;
+        else _scroll = -_page;
+    }
+    global.ap_console_scroll = max(0, global.ap_console_scroll + _scroll);
 
     if (keyboard_string != global.ap_console_completion_input)
     {
@@ -108,15 +160,29 @@
 
     if (keyboard_check_pressed(vk_enter))
     {
+        global.ap_console_scroll = 0;
         var _line = keyboard_string;
         while (string_length(_line) > 0 && string_char_at(_line, 1) == " ")
             _line = string_delete(_line, 1, 1);
+        global.ap_console_history_index = -1;
+        global.ap_console_history_draft = "";
         keyboard_string = "";
         global.ap_console_suggestion = "";
         ds_list_clear(global.ap_console_matches);
         global.ap_console_completion_input = "";
         global.ap_console_match_index = -1;
         if (_line == "") exit;
+
+        var _history_head = _line;
+        var _history_space = string_pos(" ", _line);
+        if (_history_space > 0)
+            _history_head = string_copy(_line, 1, _history_space - 1);
+        if (string_upper(_history_head) != "/PASSWORD")
+        {
+            ds_list_add(global.ap_console_history, _line);
+            if (ds_list_size(global.ap_console_history) > 2048)
+                ds_list_delete(global.ap_console_history, 0);
+        }
 
         if (string_char_at(_line, 1) == "/")
         {

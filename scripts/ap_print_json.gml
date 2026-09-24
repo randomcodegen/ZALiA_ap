@@ -33,16 +33,11 @@
     ds_map_destroy(_message);
     _text = _clean;
 
-    ds_list_add(global.ap_message_buffer, _text);
-    ds_list_add(global.ap_message_colors, _colors);
-    ds_list_add(global.ap_message_timers, 360); // 6 seconds at 60fps
     ap_console_add(_text, _colors);
-
-    // Keep last 5 messages
-    while (ds_list_size(global.ap_message_buffer) > 5)
+    if (!global.ap_console_open && _text != "")
     {
-        ds_list_delete(global.ap_message_buffer, 0);
-        ds_list_delete(global.ap_message_colors, 0);
-        ds_list_delete(global.ap_message_timers, 0);
+        ds_list_add(global.ap_message_buffer, _text);
+        ds_list_add(global.ap_message_colors, _colors);
+        ds_list_add(global.ap_message_timers, -1); // Start when visible
     }
 }

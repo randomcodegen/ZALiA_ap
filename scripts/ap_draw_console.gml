@@ -39,12 +39,23 @@
     var _y = _inputY - _lineH;
     var _i, _part, _parts, _msg, _colors, _line, _lineColors;
     var _start, _end, _code;
+    var _visible = max(1, floor((_y - (_yt + _lineH * 2)) / _lineH) + 1);
+    var _total = 0;
+    for (_i = 0; _i < ds_list_size(global.ap_console_log); _i++)
+        _total += max(1, ceil(string_length(global.ap_console_log[|_i]) / _cols));
+    global.ap_console_scroll = clamp(global.ap_console_scroll, 0, max(0, _total - _visible));
+    var _skip = global.ap_console_scroll;
     for (_i = ds_list_size(global.ap_console_log) - 1; _i >= 0 && _y >= _yt + _lineH * 2; _i--)
     {
         _msg = global.ap_console_log[|_i];
         _colors = global.ap_console_colors[|_i];
-        _parts = ceil(string_length(_msg) / _cols);
-        for (_part = _parts - 1; _part >= 0 && _y >= _yt + _lineH * 2; _part--)
+        _parts = max(1, ceil(string_length(_msg) / _cols));
+        if (_skip >= _parts)
+        {
+            _skip -= _parts;
+            continue;
+        }
+        for (_part = _parts - 1 - _skip; _part >= 0 && _y >= _yt + _lineH * 2; _part--)
         {
             _line = string_copy(_msg, _part * _cols + 1, _cols);
             _lineColors = string_copy(_colors, _part * _cols * 8 + 1, string_length(_line) * 8);
@@ -66,5 +77,6 @@
             }
             _y -= _lineH;
         }
+        _skip = 0;
     }
 }

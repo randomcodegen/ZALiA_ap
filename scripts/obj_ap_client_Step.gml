@@ -129,19 +129,20 @@
             + "ms handlers=" + string(_callback_ms) + "ms");
     }
 
-    // Tick per-message display timers; remove expired
+    // Only visible popups age
     if (variable_global_exists("ap_message_timers"))
     {
         var _mt_i;
-        var _mt_sz = ds_list_size(global.ap_message_timers);
-        for (_mt_i = 0; _mt_i < _mt_sz; _mt_i++)
-            global.ap_message_timers[|_mt_i] -= 1;
-        while (ds_list_size(global.ap_message_timers) > 0
-            && global.ap_message_timers[|0] <= 0)
+        for (_mt_i = min(3, ds_list_size(global.ap_message_timers)) - 1; _mt_i >= 0; _mt_i--)
         {
-            ds_list_delete(global.ap_message_buffer, 0);
-            ds_list_delete(global.ap_message_colors, 0);
-            ds_list_delete(global.ap_message_timers, 0);
+            if (global.ap_message_timers[|_mt_i] > 0)
+                global.ap_message_timers[|_mt_i] -= 1;
+            if (global.ap_message_timers[|_mt_i] == 0)
+            {
+                ds_list_delete(global.ap_message_buffer, _mt_i);
+                ds_list_delete(global.ap_message_colors, _mt_i);
+                ds_list_delete(global.ap_message_timers, _mt_i);
+            }
         }
     }
 

@@ -2,10 +2,17 @@
 
 if (!variable_global_exists("ap_message_timers")) exit;
 
-var _count = ds_list_size(global.ap_message_buffer);
-if (_count == 0) exit;
+if (global.ap_console_open)
+{
+    ds_list_clear(global.ap_message_buffer);
+    ds_list_clear(global.ap_message_colors);
+    ds_list_clear(global.ap_message_timers);
+    exit;
+}
 
-var _FONT_SPR  = global.dl_game_font[|global.game_font_idx];
+if (ds_list_size(global.ap_message_buffer) == 0) exit;
+
+var _FONT_SPR  = spr_Font2;
 var _CHAR_W    = sprite_get_width(_FONT_SPR);
 var _CHAR_H    = sprite_get_height(_FONT_SPR);
 var _LINE_H    = _CHAR_H + 2;
@@ -23,10 +30,12 @@ var _dl_texts  = ds_list_create();
 var _dl_colors = ds_list_create();
 var _dl_timers = ds_list_create();
 
-var _i;
+var _i, _j;
 var _bp, _line, _ns;
-for (_i = 0; _i < _count; _i++)
+for (_i = 0; _i < ds_list_size(global.ap_message_buffer)
+    && ds_list_size(_dl_texts) < 3; _i++)
 {
+    var _before = ds_list_size(_dl_texts);
     var _msg   = global.ap_message_buffer[|_i];
     var _timer = global.ap_message_timers[|_i];
 
@@ -63,12 +72,34 @@ for (_i = 0; _i < _count; _i++)
         ds_list_add(_dl_colors, _colors);
         ds_list_add(_dl_timers, _timer);
     }
+
+    var _wrapped_count = ds_list_size(_dl_texts);
+    var _keep = min(_wrapped_count, 3);
+    if (_before > 0 && _wrapped_count > 3) _keep = _before;
+    while (ds_list_size(_dl_texts) > _keep)
+    {
+        var _last = ds_list_size(_dl_texts) - 1;
+        ds_list_delete(_dl_texts, _last);
+        ds_list_delete(_dl_colors, _last);
+        ds_list_delete(_dl_timers, _last);
+    }
+    if (_before > 0 && _wrapped_count > 3)
+    {
+        if (_timer > 0) global.ap_message_timers[|_i] = -1;
+        break;
+    }
+    if (_timer < 0)
+    {
+        global.ap_message_timers[|_i] = 180;
+        for (_j = _before; _j < _keep; _j++) _dl_timers[|_j] = 180;
+    }
 }
 
 var _line_count = ds_list_size(_dl_texts);
 
-// Draw bottom-up: slot 0 = bottom-most
-for (_i = 0; _i < _line_count; _i++)
+// Show up to three queued lines at once
+var _visible_count = min(_line_count, 3);
+for (_i = 0; _i < _visible_count; _i++)
 {
     var _text  = _dl_texts[|_i];
     var _timer = _dl_timers[|_i];
@@ -77,7 +108,7 @@ for (_i = 0; _i < _line_count; _i++)
     if (_timer < 60) _alpha = _timer / 60;
     else             _alpha = 1;
 
-    var _slot  = (_line_count - 1) - _i;
+    var _slot  = (_visible_count - 1) - _i;
     var _y     = _YB - (_slot + 1) * _LINE_H - _PAD_Y;
     var _txt_w = string_length(_text) * _CHAR_W;
 

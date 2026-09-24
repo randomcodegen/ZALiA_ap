@@ -52,6 +52,10 @@
     global.ap_console_suggestion = "";
     global.ap_console_log = ds_list_create();
     global.ap_console_colors = ds_list_create();
+    global.ap_console_scroll = 0;
+    global.ap_console_history = ds_list_create();
+    global.ap_console_history_index = -1;
+    global.ap_console_history_draft = "";
     global.ap_console_commands = ds_list_create();
     global.ap_console_items = ds_list_create();
     global.ap_console_locations = ds_list_create();
