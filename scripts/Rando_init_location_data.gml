@@ -17,8 +17,8 @@ var _ALLKEY_RATING5=5;
 //                                                  //
 //                                                  //
 //                                                  //
-// PBag: Kakusu Reward Area; Cave
-_loc_num = Rando_add_location(Area_EastA+'4A',$01, LocCatID_SCon01,3, 'PBag: Kakusu Reward Area; Cave', STR_PBAG,$01);
+// PBag: Kakusu Reward Area, Cave
+_loc_num = Rando_add_location(Area_EastA+'4A',$01, LocCatID_SCon01,3, 'PBag: Kakusu Reward Area, Cave', STR_PBAG,$01);
 dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
 _a=0;
 //dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "THE<&<IS IN A<CAVE.";
@@ -26,8 +26,8 @@ dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "THE<&<IS IN A<SWAMP C
 //                                                  //
 //                                                  //
 //                                                  //
-// Kakusu Reward Area; SWORD Location
-_loc_num = Rando_add_location(Area_EastA+'48',$01, LocCatID_SCon01,3, 'Kakusu Reward Area; SWORD Location', STR_SWORD,$01);
+// Kakusu Reward Area, SWORD Location
+_loc_num = Rando_add_location(Area_EastA+'48',$01, LocCatID_SCon01,3, 'Kakusu Reward Area, SWORD Location', STR_SWORD,$01);
 dm_LOCATIONS[?hex_str(_loc_num)+STR_ALLKEY+STR_Rating]=_ALLKEY_RATING1;
 _a=0;
 //dm_LOCATIONS[?hex_str(_loc_num)+STR_Hint+hex_str(++_a)] = "&<IS IN THE<MIDDLE OF<A LAKE.";

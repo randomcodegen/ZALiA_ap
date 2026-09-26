@@ -2,6 +2,7 @@
 {
     var _slot_data = argument0;
     global.ap_created_manifest_error = false;
+    global.AP_last_error = "";
     ap_connection_trace("slot JSON decode begin chars=" + string(string_length(_slot_data)));
     var _dm = json_decode(_slot_data);
     ap_connection_trace("slot JSON decode end");
@@ -10,6 +11,7 @@
         show_debug_message("AP: Failed to parse slot_data (outer JSON too large for GMS 1.4 json_decode)");
         global.ap_slot_data = ds_map_create();
         global.ap_created_manifest_error = true;
+        global.AP_last_error = "Could not parse slot data received from the server.";
         exit;
     }
 
@@ -58,6 +60,7 @@
     if (is_undefined(global.ap_slot_kakusu_location_ids))
     {
         global.ap_created_manifest_error = true;
+        global.AP_last_error = "Slot data is missing Kakusu location IDs.";
         show_debug_message("AP: slot rejected: kakusu_location_ids is missing");
     }
 
@@ -90,6 +93,7 @@
     else
     {
         global.ap_created_manifest_error = true;
+        global.AP_last_error = "Slot data is missing the location manifest.";
         show_debug_message("AP: slot rejected: authoritative location manifest is missing");
     }
 

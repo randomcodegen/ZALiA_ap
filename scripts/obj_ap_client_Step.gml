@@ -23,7 +23,28 @@
 
         while (string_length(_remaining) > 0)
         {
-            _semi_pos = string_pos(";", _remaining);
+            // The DLL returns GML statements. A semicolon inside a quoted
+            // slot-data string is part of that string, not a statement end.
+            _semi_pos = 0;
+            var _scan_pos = 1;
+            var _quote = "";
+            while (_scan_pos <= string_length(_remaining))
+            {
+                var _scan_char = string_char_at(_remaining, _scan_pos);
+                if (_quote == "")
+                {
+                    if (_scan_char == "'" || _scan_char == chr(34))
+                        _quote = _scan_char;
+                    else if (_scan_char == ";")
+                    {
+                        _semi_pos = _scan_pos;
+                        break;
+                    }
+                }
+                else if (_scan_char == _quote)
+                    _quote = "";
+                _scan_pos++;
+            }
             if (_semi_pos == 0) break;
 
             _block = string_copy(_remaining, 1, _semi_pos - 1);
